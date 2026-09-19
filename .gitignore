@@ -1,0 +1,48 @@
+﻿# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+tts-env/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Java / Maven
+backend/target/
+**/target/
+
+# Generated media
+ai-services/tts/output/
+*.wav
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local AI model files
+ai-models/

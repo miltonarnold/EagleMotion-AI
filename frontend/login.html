@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Log In | EagleMotion AI</title>
+
+    <meta
+        name="description"
+        content="Log in to EagleMotion AI and continue creating AI-generated videos."
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* =====================================================
+           EAGLEMOTION AI LOGIN PAGE
+        ===================================================== */
+
+        .auth-page {
+            min-height: calc(100vh - 150px);
+            padding: 70px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 1050px;
+            display: grid;
+            grid-template-columns: minmax(0, 520px) minmax(280px, 380px);
+            gap: 70px;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        /* LOGIN CARD */
+
+        .auth-card {
+            width: 100%;
+            background: rgba(15, 31, 58, 0.92);
+            border: 1px solid rgba(244, 196, 48, 0.18);
+            border-radius: 18px;
+            padding: 42px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: #f4c430;
+            color: #0b1f3a;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .auth-header h1 {
+            margin: 0 0 12px;
+            color: #ffffff;
+            font-size: 34px;
+            line-height: 1.2;
+        }
+
+        .auth-header p {
+            max-width: 430px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* FORM */
+
+        .auth-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 9px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.055);
+            color: #ffffff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #f4c430;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .password-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 9px;
+        }
+
+        .password-label label {
+            margin-bottom: 0;
+        }
+
+        .forgot-link {
+            color: #f4c430;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            padding-right: 65px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #f4c430;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .auth-submit {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 4px;
+            border: 0;
+            border-radius: 9px;
+            background: #f4c430;
+            color: #0b1f3a;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .auth-submit:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        .auth-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-message {
+            min-height: 22px;
+            margin-top: 15px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* DIVIDER */
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 28px 0;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* REGISTER */
+
+        .auth-footer {
+            text-align: center;
+        }
+
+        .auth-footer p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: #f4c430;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* BENEFITS */
+
+        .auth-benefits {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .auth-benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .auth-benefit > span {
+            flex: 0 0 auto;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(244, 196, 48, 0.35);
+            border-radius: 10px;
+            color: #f4c430;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .auth-benefit h3 {
+            margin: 0 0 6px;
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .auth-benefit p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        /* HEADER */
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* FOOTER */
+
+        .site-footer {
+            margin-top: 0;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 850px) {
+
+            .auth-container {
+                grid-template-columns: 1fr;
+                max-width: 560px;
+                gap: 45px;
+            }
+
+            .auth-benefits {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+
+            .auth-benefit {
+                display: block;
+            }
+
+            .auth-benefit > span {
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .auth-page {
+                padding: 40px 18px;
+            }
+
+            .auth-card {
+                padding: 30px 22px;
+            }
+
+            .auth-header h1 {
+                font-size: 28px;
+            }
+
+            .auth-benefits {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-benefit {
+                display: flex;
+            }
+
+            .auth-benefit > span {
+                margin-bottom: 0;
+            }
+
+            .nav-actions .login-button {
+                display: none;
+            }
+
+            .nav-actions {
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+
+    <header class="site-header">
+
+        <div class="nav-container">
+
+            <a href="index.html" class="brand">
+
+                <div class="brand-icon">
+                    E
+                </div>
+
+                <div class="brand-name">
+                    EagleMotion<span>AI</span>
+                </div>
+
+            </a>
+
+            <div class="nav-actions">
+
+                <a href="index.html" class="login-button">
+                    Back to Home
+                </a>
+
+                <a href="register.html" class="signup-button">
+                    Get Started
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- LOGIN -->
+
+    <main class="auth-page">
+
+        <section class="auth-container">
+
+            <div class="auth-card">
+
+                <div class="auth-header">
+
+                    <div class="auth-icon">
+                        E
+                    </div>
+
+                    <h1>Welcome back</h1>
+
+                    <p>
+                        Log in to continue creating, editing,
+                        saving, and managing your AI-generated videos.
+                    </p>
+
+                </div>
+
+
+                <form id="loginForm" class="auth-form" novalidate>
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <div class="password-label">
+
+                            <label for="password">
+                                Password
+                            </label>
+
+                            <a
+                                href="#forgot-password"
+                                id="forgotPassword"
+                                class="forgot-link"
+                            >
+                                Forgot password?
+                            </a>
+
+                        </div>
+
+                        <div class="password-field">
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-password-toggle="password"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="cta-button auth-submit"
+                    >
+                        Log In
+                    </button>
+
+
+                    <div
+                        id="authMessage"
+                        class="auth-message"
+                        aria-live="polite"
+                    ></div>
+
+                </form>
+
+
+                <div class="auth-divider">
+                    <span>or</span>
+                </div>
+
+
+                <div class="auth-footer">
+
+                    <p>
+                        Don't have an account?
+                        <a href="register.html">
+                            Create a free account
+                        </a>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="auth-benefits">
+
+                <div class="auth-benefit">
+
+                    <span>01</span>
+
+                    <div>
+                        <h3>Create</h3>
+
+                        <p>
+                            Turn your ideas and prompts into
+                            AI-generated videos.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="auth-benefit">
+
+                    <span>02</span>
+
+                    <div>
+                        <h3>Edit</h3>
+
+                        <p>
+                            Build and refine your videos inside
+                            the EagleMotion AI creative workspace.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="auth-benefit">
+
+                    <span>03</span>
+
+                    <div>
+                        <h3>Save</h3>
+
+                        <p>
+                            Keep your video projects organized
+                            in your EagleMotion AI account.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="site-footer">
+
+        <div class="container footer-bottom">
+
+            <p>
+                © 2026 EagleMotion AI. All rights reserved.
+            </p>
+
+            <div>
+
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="pricing.html">Pricing</a>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+
+</body>
+</html>
