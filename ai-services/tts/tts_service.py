@@ -8,7 +8,7 @@ from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 # EagleMotion project root
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# Local Chatterbox model
+# Local Chatterbox model path
 MODEL_PATH = PROJECT_ROOT / "ai-models" / "chatterbox-multilingual"
 
 # Output directory
@@ -83,3 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
