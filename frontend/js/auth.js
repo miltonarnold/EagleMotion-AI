@@ -363,8 +363,12 @@
 
                 setTimeout(() => {
 
-                    window.location.href =
-                        "dashboard.html";
+                      const redirect =
+                          new URLSearchParams(window.location.search)
+                              .get("redirect");
+
+                      window.location.href =
+                          redirect || "dashboard.html";
 
                 }, 800);
 
@@ -560,8 +564,12 @@
 
                 setTimeout(() => {
 
-                    window.location.href =
-                        "dashboard.html";
+                      const redirect =
+                          new URLSearchParams(window.location.search)
+                              .get("redirect");
+
+                      window.location.href =
+                          redirect || "dashboard.html";
 
                 }, 700);
 
@@ -953,3 +961,6 @@
     );
 
 })();
+
+
+

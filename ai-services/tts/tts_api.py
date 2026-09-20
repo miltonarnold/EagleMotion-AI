@@ -3,10 +3,10 @@ from uuid import uuid4
 
 import torchaudio
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -15,9 +15,7 @@ MODEL_PATH = PROJECT_ROOT / "ai-models" / "chatterbox-multilingual"
 OUTPUT_DIR = PROJECT_ROOT / "ai-services" / "tts" / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-
 app = FastAPI(title="EagleMotion TTS API")
-
 
 print("Loading Chatterbox Multilingual TTS...")
 print(f"Model: {MODEL_PATH}")
@@ -91,5 +89,23 @@ def generate_tts(request: SpeechRequest):
         "success": True,
         "language": language,
         "file": filename,
-        "path": str(output_file)
+        "audio_url": f"/audio/{filename}"
     }
+
+
+@app.get("/audio/{filename}")
+def get_audio(filename: str):
+
+    audio_file = OUTPUT_DIR / filename
+
+    if not audio_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Audio file not found."
+        )
+
+    return FileResponse(
+        path=str(audio_file),
+        media_type="audio/wav",
+        filename=filename
+    )

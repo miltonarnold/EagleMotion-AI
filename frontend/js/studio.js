@@ -1068,15 +1068,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         generatedVideo.load();
 
+        const previewContent =
+            previewArea.querySelector("#previewContent");
 
-        const placeholder =
-            previewArea.querySelector(
-                ".generation-placeholder"
-            );
-
-
-        if (placeholder) {
-            placeholder.remove();
+        if (previewContent) {
+            previewContent.style.display = "none";
         }
 
 
@@ -1539,3 +1535,4 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 });
+

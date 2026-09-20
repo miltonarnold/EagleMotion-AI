@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>EagleMotion AI — Create Videos With AI</title>
+    <title>EagleMotion AI â€” Create Videos With AI</title>
 
     <meta
         name="description"
@@ -32,7 +32,7 @@
             </a>
 
             <nav class="main-nav">
-                <a href="studio.html">Create</a>
+                <a href="#" onclick="openStudio(); return false;">Create</a>
                 <a href="features.html">Features</a>
                 <a href="showcase.html">Showcase</a>
                 <a href="pricing.html">Pricing</a>
@@ -88,11 +88,11 @@
                     <div class="hero-actions">
 
                         <a
-                            href="studio.html"
+                            href="#" onclick="openStudio(); return false;"
                             class="cta-button"
                         >
                             Start creating
-                            <span>→</span>
+                            <span>â†’</span>
                         </a>
 
                         <a
@@ -316,8 +316,8 @@
                             an AI-generated video.
                         </p>
 
-                        <a href="studio.html">
-                            Create with AI →
+                        <a href="#" onclick="openStudio(); return false;">
+                            Create with AI â†’
                         </a>
 
                     </article>
@@ -344,8 +344,8 @@
                             an animated video.
                         </p>
 
-                        <a href="studio.html">
-                            Explore Studio →
+                        <a href="#" onclick="openStudio(); return false;">
+                            Explore Studio â†’
                         </a>
 
                     </article>
@@ -373,7 +373,7 @@
                         </p>
 
                         <a href="features.html">
-                            View features →
+                            View features â†’
                         </a>
 
                     </article>
@@ -387,7 +387,7 @@
                         href="features.html"
                         class="secondary-button"
                     >
-                        Explore all features →
+                        Explore all features â†’
                     </a>
 
                 </div>
@@ -451,7 +451,7 @@
                             </div>
 
                             <span>
-                                →
+                                â†’
                             </span>
 
                         </div>
@@ -482,7 +482,7 @@
                             </div>
 
                             <span>
-                                →
+                                â†’
                             </span>
 
                         </div>
@@ -513,7 +513,7 @@
                             </div>
 
                             <span>
-                                →
+                                â†’
                             </span>
 
                         </div>
@@ -529,7 +529,7 @@
                         href="showcase.html"
                         class="secondary-button"
                     >
-                        View full showcase →
+                        View full showcase â†’
                     </a>
 
                 </div>
@@ -659,7 +659,7 @@
                         class="cta-button"
                     >
                         Create free account
-                        <span>→</span>
+                        <span>â†’</span>
                     </a>
 
                 </div>
@@ -717,7 +717,7 @@
                     Product
                 </h4>
 
-                <a href="studio.html">
+                <a href="#" onclick="openStudio(); return false;">
                     Create
                 </a>
 
@@ -781,7 +781,7 @@
         <div class="container footer-bottom">
 
             <p>
-                © 2026 EagleMotion AI. All rights reserved.
+                Â© 2026 EagleMotion AI. All rights reserved.
             </p>
 
             <div>
@@ -807,6 +807,18 @@
 
     <script src="js/app.js"></script>
 
+
+<script>
+function openStudio() {
+    if (window.EagleMotionAuth && EagleMotionAuth.isLoggedIn()) {
+        window.location.href = "studio.html";
+    } else {
+        window.location.href = "login.html?redirect=studio.html";
+    }
+}
+</script>
 </body>
 </html>
+
+
 
