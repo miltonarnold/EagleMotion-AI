@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
         return;
     }
+
+
     console.log(
         "EagleMotion AI dashboard connected to backend."
     );
@@ -145,59 +147,96 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadDashboardData() {
 
-    try {
+        try {
 
-        const response =
-            await EagleMotionAuth.authenticatedFetch(
-                "/videos"
+            const response =
+                await auth.authenticatedFetch(
+                    "/videos"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to load your videos."
+                );
+
+            }
+
+
+            const videos =
+                await response.json();
+
+
+            dashboardData = {
+
+                videos:
+                    Array.isArray(videos)
+                        ? videos
+                        : [],
+
+                projects: [],
+
+                credits: 10
+
+            };
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load dashboard data:",
+                error
             );
 
-        if (!response.ok) {
-            throw new Error(
-                "Failed to load your videos."
-            );
+            /*
+             * Do not destroy already loaded videos
+             * if a later refresh temporarily fails.
+             */
+
+            dashboardData = {
+
+                videos:
+                    Array.isArray(
+                        dashboardData.videos
+                    )
+                        ? dashboardData.videos
+                        : [],
+
+                projects:
+                    Array.isArray(
+                        dashboardData.projects
+                    )
+                        ? dashboardData.projects
+                        : [],
+
+                credits:
+                    dashboardData.credits ?? 10
+
+            };
+
         }
 
-        const videos =
-            await response.json();
 
-        dashboardData = {
-            videos: Array.isArray(videos) ? videos : [],
-            projects: [],
-            credits: 10
-        };
-
-    } catch (error) {
-
-        console.error(
-            "Failed to load dashboard data:",
-            error
+        updateDashboardStatistics(
+            dashboardData
         );
 
-        dashboardData = {
-            videos: [],
-            projects: [],
-            credits: 10
-        };
+
+        renderRecentVideos(
+            dashboardData.videos
+        );
+
+
+        updateCredits(
+            dashboardData.credits
+        );
+
     }
 
-    updateDashboardStatistics(
-        dashboardData
-    );
 
-    renderRecentVideos(
-        dashboardData.videos
-    );
-
-    updateCredits(
-        dashboardData.credits
-    );
-
-}
-
-
-// ==========================================
-// DASHBOARD STATISTICS
+    // ==========================================
+    // DASHBOARD STATISTICS
     // ==========================================
 
     function updateDashboardStatistics(data) {
@@ -214,40 +253,103 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : [];
 
 
-        document
-            .querySelectorAll(
-                "[data-video-count]"
-            )
-            .forEach(element => {
+        const statCards =
+            document.querySelectorAll(
+                ".dashboard-stats .stat-card"
+            );
 
-                element.textContent =
-                    videos.length;
+
+        // ------------------------------------------
+        // VIDEOS CREATED
+        // ------------------------------------------
+
+        if (statCards.length >= 1) {
+
+            const card =
+                statCards[0];
+
+            const elements =
+                card.querySelectorAll("*");
+
+
+            elements.forEach(element => {
+
+                const text =
+                    element.textContent.trim();
+
+
+                if (text === "0") {
+
+                    element.textContent =
+                        videos.length;
+
+                }
 
             });
 
+        }
 
-        document
-            .querySelectorAll(
-                "[data-project-count]"
-            )
-            .forEach(element => {
 
-                element.textContent =
-                    projects.length;
+        // ------------------------------------------
+        // SAVED PROJECTS
+        // ------------------------------------------
+
+        if (statCards.length >= 2) {
+
+            const card =
+                statCards[1];
+
+            const elements =
+                card.querySelectorAll("*");
+
+
+            elements.forEach(element => {
+
+                const text =
+                    element.textContent.trim();
+
+
+                if (text === "0") {
+
+                    element.textContent =
+                        projects.length;
+
+                }
 
             });
 
+        }
 
-        document
-            .querySelectorAll(
-                "[data-credit-count]"
-            )
-            .forEach(element => {
 
-                element.textContent =
-                    data.credits ?? 0;
+        // ------------------------------------------
+        // GENERATION CREDITS
+        // ------------------------------------------
+
+        if (statCards.length >= 3) {
+
+            const card =
+                statCards[2];
+
+            const elements =
+                card.querySelectorAll("*");
+
+
+            elements.forEach(element => {
+
+                const text =
+                    element.textContent.trim();
+
+
+                if (text === "--") {
+
+                    element.textContent =
+                        data.credits ?? 0;
+
+                }
 
             });
+
+        }
 
     }
 
@@ -305,11 +407,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ==========================================
     // RECENT VIDEOS
     // ==========================================
-
-    renderRecentVideos(
-        dashboardData.videos
-    );
-
 
     function renderRecentVideos(
         videoList
@@ -789,6 +886,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ) {
 
             return "Recently";
+
         }
 
 
@@ -1243,7 +1341,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
-
-
-
-
