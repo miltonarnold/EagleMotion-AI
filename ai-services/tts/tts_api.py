@@ -36,10 +36,7 @@ app.add_middleware(
 print("Loading Chatterbox Multilingual TTS...")
 print(f"Model: {MODEL_PATH}")
 
-model = ChatterboxMultilingualTTS.from_local(
-    str(MODEL_PATH),
-    device="cpu"
-)
+model = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
 
 print("TTS API MODEL LOADED")
 
@@ -125,3 +122,4 @@ def get_audio(filename: str):
         media_type="audio/wav",
         filename=filename
     )
+
