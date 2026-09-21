@@ -113,7 +113,22 @@ public class AgnesVideoService {
         Map<String, Object> request = new HashMap<>();
 
         request.put("model", MODEL);
-        request.put("prompt", prompt.trim());
+        String naturalPrompt = """
+IMPORTANT DIALOGUE DIRECTION:
+When characters speak, make their conversation sound like a normal real-life human conversation.
+Use a relaxed, natural speaking pace rather than speaking too quickly.
+Include brief, natural pauses between sentences and ideas.
+Characters should finish their sentences before the other character responds.
+Use natural conversational rhythm, timing, emphasis, and occasional hesitation where appropriate.
+Match facial expressions, eye contact, gestures, and body language naturally to what is being said.
+Synchronize mouth movements accurately with the spoken words.
+Do not make the dialogue sound like a rushed narration, voice-over, announcement, or synthetic reading.
+Prioritize believable human interaction and realistic conversational timing.
+
+SCENE:
+""" + prompt.trim();
+
+request.put("prompt", naturalPrompt);
 
         int[] dimensions = getDimensions(aspectRatio);
 
@@ -352,3 +367,4 @@ public class AgnesVideoService {
                 : value.trim();
     }
 }
+
