@@ -11,7 +11,7 @@ import java.util.List;
 public class VideoService {
 
     private static final int MIN_DURATION = 5;
-    private static final int MAX_DURATION = 240;
+    private static final int MAX_DURATION = 18;
 
     private final VideoRepository videoRepository;
     private final UserRepository userRepository;
@@ -309,3 +309,4 @@ public class VideoService {
         videoRepository.delete(video);
     }
 }
+
