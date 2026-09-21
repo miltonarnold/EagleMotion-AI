@@ -265,7 +265,7 @@ request.put("prompt", naturalPrompt);
             try {
                 
 
-                Thread.sleep(30000);
+                Thread.sleep(15000);
 
             } catch (InterruptedException e) {
 
@@ -367,5 +367,6 @@ request.put("prompt", naturalPrompt);
                 : value.trim();
     }
 }
+
 
 
