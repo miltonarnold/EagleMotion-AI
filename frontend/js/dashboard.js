@@ -37,26 +37,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
         return;
     }
-
-
-    // ==========================================
-    // VERIFY SESSION WITH SPRING BOOT
-    // ==========================================
-
-    const backendSessionValid =
-        await auth.verifyBackendSession();
-
-
-    if (!backendSessionValid) {
-
-        console.error(
-            "Backend session could not be verified."
-        );
-
-        return;
-    }
-
-
     console.log(
         "EagleMotion AI dashboard connected to backend."
     );
@@ -1263,5 +1243,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
 
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * EagleMotion AI
  * Authentication JavaScript
  *
@@ -560,18 +560,12 @@
                     "Login successful. Redirecting...",
                     "success"
                 );
+                 const redirect =
+                     new URLSearchParams(window.location.search)
+                         .get("redirect");
 
-
-                setTimeout(() => {
-
-                      const redirect =
-                          new URLSearchParams(window.location.search)
-                              .get("redirect");
-
-                      window.location.href =
-                          redirect || "dashboard.html";
-
-                }, 700);
+                 window.location.href =
+                     redirect || "dashboard.html";
 
 
             } catch (error) {
@@ -961,6 +955,7 @@
     );
 
 })();
+
 
 
 
