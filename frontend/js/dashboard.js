@@ -1,5 +1,4 @@
-```javascript
-/*
+﻿/*
  * EagleMotion AI
  * Dashboard JavaScript
  *
@@ -166,44 +165,59 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadDashboardData() {
 
-        /*
-         * Video and Project endpoints will be connected
-         * when the corresponding Spring Boot entities
-         * and controllers are created.
-         *
-         * For now, the dashboard uses an empty state.
-         */
+    try {
+
+        const response =
+            await EagleMotionAuth.authenticatedFetch(
+                "/videos"
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "Failed to load your videos."
+            );
+        }
+
+        const videos =
+            await response.json();
 
         dashboardData = {
-
-            videos: [],
-
+            videos: Array.isArray(videos) ? videos : [],
             projects: [],
-
             credits: 10
-
         };
 
+    } catch (error) {
 
-        updateDashboardStatistics(
-            dashboardData
+        console.error(
+            "Failed to load dashboard data:",
+            error
         );
 
-
-        renderRecentVideos(
-            dashboardData.videos
-        );
-
-
-        updateCredits(
-            dashboardData.credits
-        );
-
+        dashboardData = {
+            videos: [],
+            projects: [],
+            credits: 10
+        };
     }
 
+    updateDashboardStatistics(
+        dashboardData
+    );
 
-    // ==========================================
-    // DASHBOARD STATISTICS
+    renderRecentVideos(
+        dashboardData.videos
+    );
+
+    updateCredits(
+        dashboardData.credits
+    );
+
+}
+
+
+// ==========================================
+// DASHBOARD STATISTICS
     // ==========================================
 
     function updateDashboardStatistics(data) {
@@ -1249,3 +1263,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
+
