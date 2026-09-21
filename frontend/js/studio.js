@@ -2,8 +2,7 @@
  * EagleMotion AI
  * Video Studio JavaScript
  *
- * Handles the video creation interface.
- * Supports:
+ * Handles:
  * - Text to Video
  * - Image to Video
  * - Prompt enhancement
@@ -11,6 +10,7 @@
  * - Video generation
  * - JWT authentication
  * - Video preview
+ * - Processing status polling
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -77,15 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const studioStatus =
         document.querySelector("#studioStatus");
 
-    const authRequired =
-        document.querySelector("#authRequired");
-
 
     // ==========================================
     // AUTHENTICATION
     // ==========================================
 
-    const auth = window.EagleMotionAuth;
+    const auth =
+        window.EagleMotionAuth;
 
     if (!auth) {
         console.error(
@@ -114,7 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         style: "cinematic",
 
-        isGenerating: false
+        isGenerating: false,
+
+        currentVideoId: null
 
     };
 
@@ -125,37 +125,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (textModeButton) {
 
-        textModeButton.addEventListener("click", () => {
-
-            setStudioMode("text-to-video");
-
-        });
+        textModeButton.addEventListener(
+            "click",
+            () => {
+                setStudioMode(
+                    "text-to-video"
+                );
+            }
+        );
 
     }
 
 
     if (imageModeButton) {
 
-        imageModeButton.addEventListener("click", () => {
-
-            setStudioMode("image-to-video");
-
-        });
+        imageModeButton.addEventListener(
+            "click",
+            () => {
+                setStudioMode(
+                    "image-to-video"
+                );
+            }
+        );
 
     }
 
 
     function setStudioMode(mode) {
 
-        studioState.mode = mode;
+        studioState.mode =
+            mode;
 
         const isImageMode =
             mode === "image-to-video";
 
-
-        // -------------------------------
-        // Update active button
-        // -------------------------------
 
         if (textModeButton) {
 
@@ -187,10 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        // -------------------------------
-        // Enable / disable image upload
-        // -------------------------------
-
         if (imageInput) {
 
             imageInput.disabled =
@@ -207,24 +206,22 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             uploadBox.style.pointerEvents =
-                isImageMode ? "auto" : "none";
+                isImageMode
+                    ? "auto"
+                    : "none";
 
             uploadBox.style.opacity =
-                isImageMode ? "1" : "0.55";
+                isImageMode
+                    ? "1"
+                    : "0.55";
 
         }
 
 
-        // -------------------------------
-        // Update upload text
-        // -------------------------------
-
         if (uploadTitle) {
 
             uploadTitle.textContent =
-                isImageMode
-                    ? "Add reference image"
-                    : "Add reference image";
+                "Add reference image";
 
         }
 
@@ -239,10 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        // -------------------------------
-        // Update status
-        // -------------------------------
-
         if (studioStatus) {
 
             studioStatus.textContent =
@@ -252,11 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-
-        // -------------------------------
-        // Clear image when returning
-        // to Text to Video
-        // -------------------------------
 
         if (!isImageMode) {
 
@@ -269,7 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (imagePreview) {
 
-                imagePreview.removeAttribute("src");
+                imagePreview.removeAttribute(
+                    "src"
+                );
 
                 imagePreview.style.display =
                     "none";
@@ -315,14 +305,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-
         const maximum =
             Number(
                 promptInput.getAttribute(
                     "maxlength"
                 )
             ) || 2000;
-
 
         counter.textContent =
             `${promptInput.value.length}/${maximum}`;
@@ -372,7 +360,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
 
-                // Maximum 10 MB
                 const maxSize =
                     10 * 1024 * 1024;
 
@@ -398,10 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     file;
 
 
-                // -------------------------------
-                // Image preview
-                // -------------------------------
-
                 if (imagePreview) {
 
                     const imageUrl =
@@ -413,20 +396,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     imagePreview.style.display =
                         "block";
 
-                    imagePreview.onload = () => {
+                    imagePreview.onload =
+                        () => {
 
-                        URL.revokeObjectURL(
-                            imageUrl
-                        );
+                            URL.revokeObjectURL(
+                                imageUrl
+                            );
 
-                    };
+                        };
 
                 }
 
-
-                // -------------------------------
-                // File name
-                // -------------------------------
 
                 const uploadName =
                     document.querySelector(
@@ -469,7 +449,6 @@ document.addEventListener("DOMContentLoaded", () => {
             modelSelect.value ||
             studioState.model;
 
-
         modelSelect.addEventListener(
             "change",
             () => {
@@ -494,7 +473,6 @@ document.addEventListener("DOMContentLoaded", () => {
         studioState.aspectRatio =
             aspectSelect.value ||
             studioState.aspectRatio;
-
 
         aspectSelect.addEventListener(
             "change",
@@ -521,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
             durationSelect.value ||
             studioState.duration;
 
-
         durationSelect.addEventListener(
             "change",
             () => {
@@ -546,7 +523,6 @@ document.addEventListener("DOMContentLoaded", () => {
         studioState.style =
             styleSelect.value ||
             studioState.style;
-
 
         styleSelect.addEventListener(
             "change",
@@ -575,7 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-
                 const prompt =
                     promptInput.value.trim();
 
@@ -593,16 +568,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 const enhancedPrompt =
-                    enhancePromptText(prompt);
+                    enhancePromptText(
+                        prompt
+                    );
 
 
                 promptInput.value =
                     enhancedPrompt;
 
-
                 studioState.prompt =
                     enhancedPrompt;
-
 
                 updateCharacterCount();
 
@@ -647,10 +622,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function generateVideo() {
 
-        // --------------------------------------
-        // REQUIRE LOGIN
-        // --------------------------------------
-
         if (!auth || !auth.isLoggedIn()) {
 
             showAuthRequired();
@@ -659,10 +630,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-
-        // --------------------------------------
-        // GET PROMPT
-        // --------------------------------------
 
         const prompt =
             promptInput
@@ -677,20 +644,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 "error"
             );
 
-
             if (promptInput) {
                 promptInput.focus();
             }
-
 
             return;
 
         }
 
-
-        // --------------------------------------
-        // IMAGE MODE VALIDATION
-        // --------------------------------------
 
         if (
             studioState.mode === "image-to-video" &&
@@ -707,10 +668,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        // --------------------------------------
-        // PREVENT DUPLICATES
-        // --------------------------------------
-
         if (studioState.isGenerating) {
             return;
         }
@@ -719,6 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
         studioState.isGenerating =
             true;
 
+        studioState.currentVideoId =
+            null;
 
         setGeneratingState(true);
 
@@ -728,7 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             // ----------------------------------
-            // PREPARE REQUEST
+            // REQUEST
             // ----------------------------------
 
             const requestBody = {
@@ -737,7 +696,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     prompt.substring(0, 60) ||
                     "EagleMotion Video",
 
-                prompt: prompt,
+                prompt:
+                    prompt,
 
                 mode:
                     studioState.mode === "image-to-video"
@@ -751,7 +711,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     studioState.aspectRatio,
 
                 duration:
-                    Number(studioState.duration) || 5,
+                    Number(
+                        studioState.duration
+                    ) || 5,
 
                 visualStyle:
                     studioState.style
@@ -759,15 +721,16 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
 
-            // ----------------------------------
-            // IMAGE DATA
-            // ----------------------------------
-
             if (
                 studioState.mode === "image-to-video" &&
                 studioState.referenceImage
             ) {
 
+                /*
+                 * Keep the reference filename here
+                 * because the current backend request
+                 * model may accept this field.
+                 */
                 requestBody.referenceImageName =
                     studioState.referenceImage.name;
 
@@ -781,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             // ----------------------------------
-            // BACKEND REQUEST
+            // SEND TO BACKEND
             // ----------------------------------
 
             const response =
@@ -849,7 +812,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             // ----------------------------------
-            // RESPONSE
+            // INITIAL RESPONSE
             // ----------------------------------
 
             const videoData =
@@ -857,42 +820,155 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             console.log(
-                "EagleMotion video generated:",
+                "EagleMotion generation response:",
                 videoData
             );
 
 
-            // ----------------------------------
-            // VIDEO URL
-            // ----------------------------------
+            const videoId =
+                videoData.id;
 
-            const videoUrl =
+
+            const initialStatus =
+                String(
+                    videoData.status || ""
+                ).toUpperCase();
+
+
+            const initialVideoUrl =
                 videoData.videoUrl ||
                 videoData.videoURL ||
                 videoData.url;
 
 
-            if (!videoUrl) {
+            // ----------------------------------
+            // COMPLETED IMMEDIATELY
+            // ----------------------------------
+
+            if (
+                initialStatus === "COMPLETED" &&
+                initialVideoUrl
+            ) {
+
+                studioState.currentVideoId =
+                    videoId || null;
+
+
+                showGeneratedVideo(
+                    initialVideoUrl
+                );
+
+
+                showStudioMessage(
+                    "Your video has been generated successfully.",
+                    "success"
+                );
+
+
+                notifyVideoCompleted(
+                    videoData
+                );
+
+
+                return;
+
+            }
+
+
+            // ----------------------------------
+            // FAILED IMMEDIATELY
+            // ----------------------------------
+
+            if (
+                initialStatus === "FAILED"
+            ) {
 
                 throw new Error(
-                    "The video was generated but no video URL was returned by the backend."
+                    videoData.errorMessage ||
+                    "Video generation failed."
                 );
 
             }
 
 
             // ----------------------------------
-            // SHOW VIDEO
+            // PROCESSING
             // ----------------------------------
 
-            showGeneratedVideo(
-                videoUrl
-            );
+            if (
+                initialStatus === "PROCESSING" &&
+                videoId
+            ) {
+
+                studioState.currentVideoId =
+                    videoId;
 
 
-            showStudioMessage(
-                "Your video has been generated successfully.",
-                "success"
+                showStudioMessage(
+                    "Your video is being generated. We will show it as soon as it is ready.",
+                    "info"
+                );
+
+
+                await pollVideoUntilComplete(
+                    videoId
+                );
+
+
+                return;
+
+            }
+
+
+            // ----------------------------------
+            // FALLBACK
+            // ----------------------------------
+
+            if (initialVideoUrl) {
+
+                studioState.currentVideoId =
+                    videoId || null;
+
+
+                showGeneratedVideo(
+                    initialVideoUrl
+                );
+
+
+                showStudioMessage(
+                    "Your video has been generated successfully.",
+                    "success"
+                );
+
+
+                notifyVideoCompleted(
+                    videoData
+                );
+
+
+                return;
+
+            }
+
+
+            if (videoId) {
+
+                studioState.currentVideoId =
+                    videoId;
+
+
+                await pollVideoUntilComplete(
+                    videoId
+                );
+
+
+                return;
+
+            }
+
+
+            throw new Error(
+                "The backend returned no video ID or video URL."
             );
 
         } catch (error) {
@@ -914,12 +990,228 @@ document.addEventListener("DOMContentLoaded", () => {
             studioState.isGenerating =
                 false;
 
-
             setGeneratingState(
                 false
             );
 
         }
+
+    }
+
+
+    // ==========================================
+    // POLL VIDEO STATUS
+    // ==========================================
+
+    async function pollVideoUntilComplete(
+        videoId
+    ) {
+
+        const maximumAttempts =
+            120;
+
+        const pollingInterval =
+            3000;
+
+
+        for (
+            let attempt = 1;
+            attempt <= maximumAttempts;
+            attempt++
+        ) {
+
+            try {
+
+                const response =
+                    await auth.authenticatedFetch(
+                        `/videos/${videoId}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Could not check video generation status."
+                    );
+
+                }
+
+
+                const videoData =
+                    await response.json();
+
+
+                console.log(
+                    `EagleMotion video status ${attempt}:`,
+                    videoData
+                );
+
+
+                const status =
+                    String(
+                        videoData.status || ""
+                    ).toUpperCase();
+
+
+                // --------------------------------
+                // COMPLETED
+                // --------------------------------
+
+                if (
+                    status === "COMPLETED"
+                ) {
+
+                    const videoUrl =
+                        videoData.videoUrl ||
+                        videoData.videoURL ||
+                        videoData.url;
+
+
+                    if (!videoUrl) {
+
+                        throw new Error(
+                            "Video generation completed but no video URL was returned."
+                        );
+
+                    }
+
+
+                    showGeneratedVideo(
+                        videoUrl
+                    );
+
+
+                    showStudioMessage(
+                        "Your video has been generated successfully.",
+                        "success"
+                    );
+
+
+                    notifyVideoCompleted(
+                        videoData
+                    );
+
+
+                    return videoData;
+
+                }
+
+
+                // --------------------------------
+                // FAILED
+                // --------------------------------
+
+                if (
+                    status === "FAILED"
+                ) {
+
+                    throw new Error(
+                        videoData.errorMessage ||
+                        "Video generation failed."
+                    );
+
+                }
+
+
+                // --------------------------------
+                // PROCESSING
+                // --------------------------------
+
+                updateProcessingMessage(
+                    attempt,
+                    maximumAttempts
+                );
+
+
+                await sleep(
+                    pollingInterval
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "EagleMotion polling error:",
+                    error
+                );
+
+                throw error;
+
+            }
+
+        }
+
+
+        throw new Error(
+            "Video generation is taking longer than expected. Please check your dashboard for the video."
+        );
+
+    }
+
+
+    function updateProcessingMessage(
+        attempt,
+        maximumAttempts
+    ) {
+
+        const elapsedSeconds =
+            Math.round(
+                (attempt * 3)
+            );
+
+
+        if (generationStatus) {
+
+            generationStatus.style.display =
+                "block";
+
+            generationStatus.textContent =
+                `Generating your video with AI... ${elapsedSeconds}s`;
+
+        }
+
+
+        if (attempt === 1) {
+
+            showStudioMessage(
+                "Your video is processing. Please wait...",
+                "info"
+            );
+
+        }
+
+    }
+
+
+    function sleep(milliseconds) {
+
+        return new Promise(
+            resolve => {
+                setTimeout(
+                    resolve,
+                    milliseconds
+                );
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // VIDEO COMPLETION EVENT
+    // ==========================================
+
+    function notifyVideoCompleted(
+        videoData
+    ) {
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "eagleMotion:videoCompleted",
+                {
+                    detail: videoData
+                }
+            )
+        );
 
     }
 
@@ -1032,8 +1324,17 @@ document.addEventListener("DOMContentLoaded", () => {
         videoUrl
     ) {
 
-        if (!previewArea || !videoUrl) {
+        if (
+            !previewArea ||
+            !videoUrl
+        ) {
+
+            console.error(
+                "Cannot display video: preview area or video URL is missing."
+            );
+
             return;
+
         }
 
 
@@ -1048,17 +1349,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        generatedVideo.src =
-            videoUrl;
-
+        // --------------------------------------
+        // DISPLAY VIDEO IMMEDIATELY
+        // --------------------------------------
 
         generatedVideo.style.display =
             "block";
 
-
         generatedVideo.controls =
             true;
-
 
         generatedVideo.setAttribute(
             "preload",
@@ -1066,15 +1365,39 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+        generatedVideo.src =
+            videoUrl;
+
+
+        /*
+         * The video element is displayed before
+         * loading metadata so the Studio does not
+         * wait for the entire file to download.
+         */
         generatedVideo.load();
 
+
+        // --------------------------------------
+        // HIDE EMPTY PREVIEW CONTENT
+        // --------------------------------------
+
         const previewContent =
-            previewArea.querySelector("#previewContent");
+            previewArea.querySelector(
+                "#previewContent"
+            );
+
 
         if (previewContent) {
-            previewContent.style.display = "none";
+
+            previewContent.style.display =
+                "none";
+
         }
 
+
+        // --------------------------------------
+        // UPDATE STATUS LABEL
+        // --------------------------------------
 
         const statusLabel =
             previewArea.querySelector(
@@ -1088,6 +1411,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Video generated successfully";
 
         }
+
+
+        // --------------------------------------
+        // VIDEO EVENTS
+        // --------------------------------------
+
+        generatedVideo.onloadedmetadata =
+            () => {
+
+                console.log(
+                    "EagleMotion video metadata loaded."
+                );
+
+            };
+
+
+        generatedVideo.onerror =
+            () => {
+
+                console.error(
+                    "The generated video could not be loaded:",
+                    videoUrl
+                );
+
+                showStudioMessage(
+                    "The video was generated, but the video file could not be loaded in the browser.",
+                    "error"
+                );
+
+            };
 
     }
 
@@ -1261,7 +1614,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.saveCurrentEagleMotionProject =
         async function() {
 
-            if (!auth || !auth.isLoggedIn()) {
+            if (
+                !auth ||
+                !auth.isLoggedIn()
+            ) {
 
                 showAuthRequired();
 
@@ -1516,7 +1872,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showGeneratedVideo,
 
-        updateMode: setStudioMode
+        updateMode:
+            setStudioMode
 
     };
 
@@ -1535,4 +1892,3 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 });
-

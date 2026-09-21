@@ -6,6 +6,7 @@ import com.eaglemotion.backend.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class VideoService {
@@ -55,7 +56,9 @@ public class VideoService {
                 mode.trim().isEmpty()) {
 
             mode = "TEXT_TO_VIDEO";
+
         } else {
+
             mode = mode.trim().toUpperCase();
         }
 
@@ -68,10 +71,6 @@ public class VideoService {
             );
         }
 
-        /*
-         * Image-to-video requires an image URL.
-         * Text-to-video does not.
-         */
         if (mode.equals("IMAGE_TO_VIDEO")) {
 
             if (request.getImageUrl() == null ||
@@ -137,94 +136,118 @@ public class VideoService {
         );
 
         video.setAspectRatio(aspectRatio);
-
         video.setDuration(duration);
-
         video.setVisualStyle(visualStyle);
-
         video.setStatus("PROCESSING");
 
         Video savedVideo =
                 videoRepository.save(video);
 
-        try {
+        final Long videoId =
+                savedVideo.getId();
 
-            String videoUrl;
+        final String generationPrompt =
+                request.getPrompt().trim();
 
-            /*
-             * Text-to-video
-             */
-            if (mode.equals("TEXT_TO_VIDEO")) {
+        final String generationMode =
+                mode;
 
-                videoUrl =
-                        agnesVideoService.generateVideo(
-                                request.getPrompt().trim(),
-                                duration,
-                                mapAspectRatio(aspectRatio)
-                        );
+        final String generationImageUrl =
+                request.getImageUrl();
 
-            /*
-             * Image-to-video
-             */
-            } else {
+        final int generationDuration =
+                duration;
 
-                videoUrl =
-                        agnesVideoService.generateVideo(
-                                request.getPrompt().trim(),
-                                duration,
-                                mapAspectRatio(aspectRatio),
-                                request.getImageUrl().trim()
-                        );
-            }
+        final String generationAspectRatio =
+                mapAspectRatio(aspectRatio);
 
-            if (videoUrl == null ||
-                    videoUrl.trim().isEmpty()) {
+        CompletableFuture.runAsync(() -> {
 
-                throw new RuntimeException(
-                        "Agnes returned no video URL"
+            try {
+
+                String videoUrl;
+
+                if (generationMode.equals("TEXT_TO_VIDEO")) {
+
+                    videoUrl =
+                            agnesVideoService.generateVideo(
+                                    generationPrompt,
+                                    generationDuration,
+                                    generationAspectRatio
+                            );
+
+                } else {
+
+                    videoUrl =
+                            agnesVideoService.generateVideo(
+                                    generationPrompt,
+                                    generationDuration,
+                                    generationAspectRatio,
+                                    generationImageUrl.trim()
+                            );
+                }
+
+                if (videoUrl == null ||
+                        videoUrl.trim().isEmpty()) {
+
+                    throw new RuntimeException(
+                            "Agnes returned no video URL"
+                    );
+                }
+
+                Video completedVideo =
+                        videoRepository.findById(videoId)
+                                .orElseThrow(() ->
+                                        new RuntimeException(
+                                                "Video record not found"
+                                        ));
+
+                completedVideo.setVideoUrl(
+                        videoUrl
                 );
+
+                completedVideo.setStatus(
+                        "COMPLETED"
+                );
+
+                completedVideo.setErrorMessage(
+                        null
+                );
+
+                videoRepository.save(
+                        completedVideo
+                );
+
+            } catch (Exception e) {
+
+                Video failedVideo =
+                        videoRepository.findById(videoId)
+                                .orElse(null);
+
+                if (failedVideo != null) {
+
+                    failedVideo.setStatus(
+                            "FAILED"
+                    );
+
+                    String error =
+                            e.getMessage() == null ||
+                                    e.getMessage().trim().isEmpty()
+                                    ? "Video generation failed"
+                                    : e.getMessage();
+
+                    failedVideo.setErrorMessage(
+                            error
+                    );
+
+                    videoRepository.save(
+                            failedVideo
+                    );
+                }
+
             }
 
-            savedVideo.setVideoUrl(
-                    videoUrl
-            );
-
-            savedVideo.setStatus(
-                    "COMPLETED"
-            );
-
-            savedVideo.setErrorMessage(
-                    null
-            );
-
-            savedVideo =
-                    videoRepository.save(savedVideo);
-
-        } catch (Exception e) {
-
-            savedVideo.setStatus(
-                    "FAILED"
-            );
-
-            String error =
-                    e.getMessage() == null ||
-                            e.getMessage().trim().isEmpty()
-                            ? "Video generation failed"
-                            : e.getMessage();
-
-            savedVideo.setErrorMessage(
-                    error
-            );
-
-            savedVideo =
-                    videoRepository.save(savedVideo);
-
-            throw new RuntimeException(
-                    "Agnes video generation failed: "
-                            + error,
-                    e
-            );
-        }
+        });
 
         return new VideoResponse(savedVideo);
     }
@@ -309,4 +332,3 @@ public class VideoService {
         videoRepository.delete(video);
     }
 }
-
