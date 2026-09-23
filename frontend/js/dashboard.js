@@ -1,4 +1,4 @@
-/*
+﻿/*
  * EagleMotion AI
  * Dashboard JavaScript
  *
@@ -409,74 +409,85 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ==========================================
 
     function renderRecentVideos(
-        videoList
-    ) {
+    videoList
+) {
 
-        const container =
-            document.querySelector(
-                "#recentVideos, [data-recent-videos]"
+    let container =
+        document.querySelector(
+            "#recentVideos, [data-recent-videos]"
+        );
+
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "recentVideos";
+
+        const panels =
+            document.querySelectorAll(".dashboard-panel");
+
+        const recentPanel =
+            [...panels].find(panel =>
+                panel.textContent
+                    .toLowerCase()
+                    .includes("recent videos")
             );
 
-
-        if (!container) {
-            container = document.createElement("div");
-            container.id = "recentVideos";
-
-            const panels =
-                document.querySelectorAll(".dashboard-panel");
-
-            const recentPanel =
-                [...panels].find(panel =>
-                    panel.textContent
-                        .toLowerCase()
-                        .includes("recent videos")
-                );
-
-            if (!recentPanel) {
-                return;
-            }
-
-            recentPanel.appendChild(container);
-        }
-
-
-        if (
-            !Array.isArray(videoList) ||
-            videoList.length === 0
-        ) {
-
-            renderEmptyVideos(
-                container
-            );
-
+        if (!recentPanel) {
             return;
         }
 
-
-        container.innerHTML = "";
-
-
-        videoList
-            .slice(0, 4)
-            .forEach(video => {
-
-                const card =
-                    createVideoCard(
-                        video
-                    );
-
-
-                container.appendChild(
-                    card
-                );
-
-            });
-
+        recentPanel.appendChild(container);
     }
 
+    if (
+        !Array.isArray(videoList) ||
+        videoList.length === 0
+    ) {
+        renderEmptyVideos(container);
+        return;
+    }
 
-    // ==========================================
-    // EMPTY VIDEO STATE
+    container.innerHTML = "";
+
+    videoList
+        .slice(0, 4)
+        .forEach(video => {
+            const card =
+                createVideoCard(
+                    video
+                );
+
+            container.appendChild(
+                card
+            );
+        });
+
+    const seeMore =
+        document.createElement("a");
+
+    seeMore.href =
+        "generated-videos.html";
+
+    seeMore.className =
+        "small-button";
+
+    seeMore.textContent =
+        "See more";
+
+    seeMore.style.display =
+        "inline-block";
+
+    seeMore.style.marginTop =
+        "20px";
+
+    container.appendChild(
+        seeMore
+    );
+}
+
+
+// ==========================================
+// EMPTY VIDEO STATE
+// ==========================================
     // ==========================================
 
     function renderEmptyVideos(
@@ -1369,5 +1380,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
 
 
