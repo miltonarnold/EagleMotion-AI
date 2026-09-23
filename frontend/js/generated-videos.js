@@ -1,4 +1,4 @@
-const API_BASE = "";
+﻿const API_BASE = "";
 
 let allVideos = [];
 let currentFilter = "all";
@@ -253,7 +253,7 @@ function createVideoCard(video) {
                 ></video>
 
                 <div class="video-play-overlay">
-                    ▶
+                    Gû¦
                 </div>
             </div>
         `;
@@ -289,7 +289,12 @@ function createVideoCard(video) {
                 Play
             </button>
 
-            <button class="video-action-btn" onclick="downloadVideo(${video.id})">Download</button>
+            <button
+                class="video-action-btn"
+                onclick="downloadVideo(${video.id})"
+            >
+                Download
+            </button>
 
             <button
                 class="video-action-btn danger"
@@ -730,11 +735,12 @@ function escapeAttribute(value) {
     return escapeHtml(value);
 }
 
-
 async function downloadVideo(videoId) {
 
     const video =
-        allVideos.find(v => Number(v.id) === Number(videoId));
+        allVideos.find(
+            v => Number(v.id) === Number(videoId)
+        );
 
     if (!video || !video.videoUrl) {
         alert("Video download is unavailable.");
@@ -744,7 +750,9 @@ async function downloadVideo(videoId) {
     try {
 
         const response =
-            await fetch(video.videoUrl);
+            await EagleMotionAuth.authenticatedFetch(
+                `${API_BASE}/videos/${videoId}/download`
+            );
 
         if (!response.ok) {
             throw new Error("Download failed");
@@ -760,16 +768,21 @@ async function downloadVideo(videoId) {
             document.createElement("a");
 
         link.href = url;
+
         link.download =
             (video.title || "EagleMotion-Video")
                 .replace(/[^a-z0-9-_]/gi, "_")
                 + ".mp4";
 
         document.body.appendChild(link);
+
         link.click();
+
         link.remove();
 
-        URL.revokeObjectURL(url);
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 1000);
 
     } catch (error) {
 
@@ -783,5 +796,4 @@ async function downloadVideo(videoId) {
         );
     }
 }
-
 

@@ -331,4 +331,22 @@ public class VideoService {
 
         videoRepository.delete(video);
     }
+
+    public String getVideoDownloadUrl(Long videoId, String userEmail) {
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Video video = videoRepository
+                .findByIdAndUser(videoId, user)
+                .orElseThrow(() -> new RuntimeException("Video not found"));
+
+        if (video.getVideoUrl() == null || video.getVideoUrl().trim().isEmpty()) {
+            throw new RuntimeException("Video download is unavailable");
+        }
+
+        return video.getVideoUrl();
+    }
+
+
 }
