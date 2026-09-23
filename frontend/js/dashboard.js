@@ -419,7 +419,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         if (!container) {
-            return;
+            container = document.createElement("div");
+            container.id = "recentVideos";
+
+            const panels =
+                document.querySelectorAll(".dashboard-panel");
+
+            const recentPanel =
+                [...panels].find(panel =>
+                    panel.textContent
+                        .toLowerCase()
+                        .includes("recent videos")
+                );
+
+            if (!recentPanel) {
+                return;
+            }
+
+            recentPanel.appendChild(container);
         }
 
 
@@ -1352,4 +1369,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
 
