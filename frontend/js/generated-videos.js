@@ -289,16 +289,7 @@ function createVideoCard(video) {
                 Play
             </button>
 
-            <a
-                class="video-action-btn"
-                href="${escapeAttribute(
-                    video.videoUrl || "#"
-                )}"
-                download
-                target="_blank"
-            >
-                Download
-            </a>
+            <button class="video-action-btn" onclick="downloadVideo(${video.id})">Download</button>
 
             <button
                 class="video-action-btn danger"
@@ -738,3 +729,59 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
     return escapeHtml(value);
 }
+
+
+async function downloadVideo(videoId) {
+
+    const video =
+        allVideos.find(v => Number(v.id) === Number(videoId));
+
+    if (!video || !video.videoUrl) {
+        alert("Video download is unavailable.");
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(video.videoUrl);
+
+        if (!response.ok) {
+            throw new Error("Download failed");
+        }
+
+        const blob =
+            await response.blob();
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+        link.download =
+            (video.title || "EagleMotion-Video")
+                .replace(/[^a-z0-9-_]/gi, "_")
+                + ".mp4";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+
+        console.error(
+            "Video download failed:",
+            error
+        );
+
+        alert(
+            "Unable to download this video. Please try again."
+        );
+    }
+}
+
+
