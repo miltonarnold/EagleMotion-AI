@@ -1,4 +1,4 @@
-﻿/*
+/*
  * EagleMotion AI
  * Dashboard JavaScript
  *
@@ -440,7 +440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         videoList
-            .slice(0, 6)
+            .slice(0, 4)
             .forEach(video => {
 
                 const card =
@@ -512,6 +512,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         card.className =
             "dashboard-video-card";
+
+        card.style.cursor = "pointer";
+
+        card.addEventListener(
+            "click",
+            () => {
+                window.location.href =
+                    "generated-videos.html";
+            }
+        );
+
 
 
         const title =
@@ -1341,3 +1352,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
