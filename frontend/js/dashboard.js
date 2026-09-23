@@ -227,7 +227,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             dashboardData.videos
         );
 
-        limitDashboardVideoList();
+        setTimeout(
+            limitDashboardVideoList,
+            500
+        );
 
 
         updateCredits(
@@ -420,11 +423,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
     if (!container) {
-        container = document.createElement("div");
-        container.id = "recentVideos";
 
         const panels =
-            document.querySelectorAll(".dashboard-panel");
+            document.querySelectorAll(
+                ".dashboard-panel"
+            );
 
         const recentPanel =
             [...panels].find(panel =>
@@ -437,7 +440,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        recentPanel.appendChild(container);
+        container =
+            document.createElement("div");
+
+        container.id =
+            "recentVideos";
+
+        recentPanel.appendChild(
+            container
+        );
     }
 
     if (
@@ -457,17 +468,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 createVideoCard(
                     video
                 );
-    seeMore.style.display =
-        "inline-block";
 
-    seeMore.style.marginTop =
-        "20px";
-
-    container.appendChild(
-        seeMore
-    );
+            container.appendChild(
+                card
+            );
+        });
 }
-
 
 function limitDashboardVideoList() {
 
@@ -1413,6 +1419,8 @@ function limitDashboardVideoList() {
     );
 
 });
+
+
 
 
 
