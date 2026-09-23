@@ -1,4 +1,4 @@
-﻿/*
+/*
  * EagleMotion AI
  * Dashboard JavaScript
  *
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         setTimeout(
             limitDashboardVideoList,
-            500
+            1000
         );
 
 
@@ -483,6 +483,10 @@ function limitDashboardVideoList() {
         );
 
     if (!list) {
+        setTimeout(
+            limitDashboardVideoList,
+            300
+        );
         return;
     }
 
@@ -490,6 +494,14 @@ function limitDashboardVideoList() {
         [...list.querySelectorAll(
             ".dashboard-video-item"
         )];
+
+    if (videos.length === 0) {
+        setTimeout(
+            limitDashboardVideoList,
+            300
+        );
+        return;
+    }
 
     videos
         .slice(4)
@@ -1419,6 +1431,8 @@ function limitDashboardVideoList() {
     );
 
 });
+
+
 
 
 
