@@ -227,6 +227,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             dashboardData.videos
         );
 
+        limitDashboardVideoList();
+
 
         updateCredits(
             dashboardData.credits
@@ -455,24 +457,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 createVideoCard(
                     video
                 );
-
-            container.appendChild(
-                card
-            );
-        });
-
-    const seeMore =
-        document.createElement("a");
-
-    seeMore.href =
-        "generated-videos.html";
-
-    seeMore.className =
-        "small-button";
-
-    seeMore.textContent =
-        "See more";
-
     seeMore.style.display =
         "inline-block";
 
@@ -484,6 +468,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 }
 
+
+function limitDashboardVideoList() {
+
+    const list =
+        document.querySelector(
+            ".dashboard-video-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    const videos =
+        [...list.querySelectorAll(
+            ".dashboard-video-item"
+        )];
+
+    videos
+        .slice(4)
+        .forEach(video => video.remove());
+
+    if (
+        !list.parentElement.querySelector(
+            ".dashboard-see-more"
+        )
+    ) {
+        const seeMore =
+            document.createElement("a");
+
+        seeMore.href =
+            "generated-videos.html";
+
+        seeMore.className =
+            "small-button dashboard-see-more";
+
+        seeMore.textContent =
+            "See more";
+
+        seeMore.style.display =
+            "inline-block";
+
+        seeMore.style.marginTop =
+            "20px";
+
+        list.parentElement.appendChild(
+            seeMore
+        );
+    }
+}
 
 // ==========================================
 // EMPTY VIDEO STATE
@@ -1380,6 +1413,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
+
+
 
 
 
