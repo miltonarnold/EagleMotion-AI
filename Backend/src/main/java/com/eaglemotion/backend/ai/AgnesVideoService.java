@@ -149,6 +149,8 @@ request.put("prompt", naturalPrompt);
                 .retrieve()
                 .body(JsonNode.class);
 
+        System.out.println("AGNES CREATE RESPONSE: " + submitted);
+
         if (submitted == null) {
             throw new RuntimeException(
                     "Agnes returned an empty response"
@@ -227,6 +229,8 @@ request.put("prompt", naturalPrompt);
                         "Agnes returned an empty status response"
                 );
             }
+
+            System.out.println("AGNES POLL RESPONSE: " + status);
 
             String currentStatus =
                     getText(status, "status");
