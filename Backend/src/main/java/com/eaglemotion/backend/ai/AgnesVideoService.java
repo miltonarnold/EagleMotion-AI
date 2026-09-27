@@ -149,8 +149,6 @@ request.put("prompt", naturalPrompt);
                 .retrieve()
                 .body(JsonNode.class);
 
-        System.out.println("AGNES CREATE RESPONSE: " + submitted);
-
         if (submitted == null) {
             throw new RuntimeException(
                     "Agnes returned an empty response"
@@ -191,9 +189,27 @@ request.put("prompt", naturalPrompt);
 
         while (System.currentTimeMillis() < timeout) {
 
-            JsonNode status;
+            JsonNode status = null;
 
-            if (videoId != null && !videoId.isBlank()) {
+            try {
+
+                if (taskId != null && !taskId.isBlank()) {
+
+                    status = restClient
+                            .get()
+                            .uri(
+                                    "/v1/videos/"
+                                            + taskId
+                            )
+                            .retrieve()
+                            .body(JsonNode.class);
+                }
+
+            } catch (Exception legacyError) {
+
+                if (videoId == null || videoId.isBlank()) {
+                    throw legacyError;
+                }
 
                 status = restClient
                         .get()
@@ -211,17 +227,6 @@ request.put("prompt", naturalPrompt);
                                         .build())
                         .retrieve()
                         .body(JsonNode.class);
-
-            } else {
-
-                status = restClient
-                        .get()
-                        .uri(
-                                "/v1/videos/"
-                                        + taskId
-                        )
-                        .retrieve()
-                        .body(JsonNode.class);
             }
 
             if (status == null) {
@@ -229,8 +234,6 @@ request.put("prompt", naturalPrompt);
                         "Agnes returned an empty status response"
                 );
             }
-
-            System.out.println("AGNES POLL RESPONSE: " + status);
 
             String currentStatus =
                     getText(status, "status");
@@ -240,9 +243,7 @@ request.put("prompt", naturalPrompt);
                 String videoUrl =
                         getText(status, "url");
 
-                if (videoUrl == null
-                        || videoUrl.isBlank()) {
-
+                if (videoUrl == null || videoUrl.isBlank()) {
                     throw new RuntimeException(
                             "Agnes completed the video "
                                     + "but returned no video URL"
@@ -267,12 +268,8 @@ request.put("prompt", naturalPrompt);
             }
 
             try {
-                
-
                 Thread.sleep(10000);
-
             } catch (InterruptedException e) {
-
                 Thread.currentThread().interrupt();
 
                 throw new RuntimeException(
