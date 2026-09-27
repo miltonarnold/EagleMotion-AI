@@ -253,7 +253,7 @@ function createVideoCard(video) {
                 ></video>
 
                 <div class="video-play-overlay">
-                    Gû¦
+                    ▶
                 </div>
             </div>
         `;
