@@ -192,6 +192,7 @@ function createVideoCard(video) {
 
     card.innerHTML = buildVideoCardHTML(
         video,
+        videoId,
         status,
         videoUrl,
         title,
@@ -259,6 +260,7 @@ function createVideoCard(video) {
 
 function buildVideoCardHTML(
     video,
+    videoId,
     status,
     videoUrl,
     title,
@@ -277,7 +279,7 @@ function buildVideoCardHTML(
             '<video class="video-card-preview" ' +
             'muted playsinline preload="metadata">' +
             '<source src="' +
-            escapeHtml(videoUrl) +
+            escapeHtml("/videos/" + videoId + "/download") +
             '" type="video/mp4">' +
             "</video>";
     } else {
