@@ -1,4 +1,4 @@
-﻿const API_BASE = "";
+const API_BASE = "";
 
 let allVideos = [];
 let currentFilter = "all";
@@ -199,6 +199,12 @@ function createVideoCard(video) {
         createdAt
     );
 
+    const previewVideo = card.querySelector(".video-card-preview");
+
+    if (previewVideo && videoId) {
+        loadVideoPreview(previewVideo, videoId);
+    }
+
     card.addEventListener("click", () => {
         if (status === "completed" && videoUrl) {
             openVideoPlayer(video);
@@ -276,12 +282,9 @@ function buildVideoCardHTML(
 
     if (status === "completed" && videoUrl) {
         mediaHTML =
-            '<video class="video-card-preview" ' +
-            'muted playsinline preload="metadata">' +
-            '<source src="' +
-            escapeHtml(EagleMotionAuth.API_BASE_URL + "/videos/" + videoId + "/download") +
-            '" type="video/mp4">' +
-            "</video>";
+            '<video class="video-card-preview" data-video-id="' +
+            escapeHtml(videoId) +
+            '" muted playsinline preload="none"></video>';
     } else {
         mediaHTML =
             '<div class="video-card-placeholder">' +
@@ -396,6 +399,32 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+async function loadVideoPreview(videoElement, videoId) {
+    try {
+        const response = await EagleMotionAuth.authenticatedFetch(
+            "/videos/" + videoId + "/download"
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Video preview request failed: " + response.status
+            );
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        videoElement.src = objectUrl;
+        videoElement.load();
+        videoElement.dataset.objectUrl = objectUrl;
+    } catch (error) {
+        console.error(
+            "Unable to load video preview:",
+            error
+        );
+    }
 }
 
 async function downloadVideo(videoId) {
