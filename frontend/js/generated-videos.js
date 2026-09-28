@@ -104,6 +104,7 @@ async function loadGeneratedVideos() {
 
 function renderVideos() {
     hideLoading();
+
     const grid =
         document.getElementById("generatedVideosGrid");
 
@@ -128,26 +129,31 @@ function renderVideos() {
         grid.appendChild(card);
 
         const status =
-            video.status ||
-            video.state ||
-            "";
+            String(
+                video.status ||
+                video.state ||
+                ""
+            ).toLowerCase();
 
-        const videoId =
-            video.id ||
-            video.videoId ||
+        const videoUrl =
+            video.videoUrl ||
+            video.videoURL ||
+            video.url ||
             "";
 
         if (
-            status.toLowerCase() === "completed" &&
-            videoId
+            status === "completed" &&
+            videoUrl
         ) {
             const previewVideo =
-                card.querySelector(".video-card-preview");
+                card.querySelector(
+                    ".video-card-preview"
+                );
 
             if (previewVideo) {
                 loadVideoPreview(
                     previewVideo,
-                    videoId
+                    videoUrl
                 );
             }
         }
@@ -419,55 +425,21 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 
-async function loadVideoPreview(videoElement, videoId) {
-    try {
-        const response =
-            await EagleMotionAuth.authenticatedFetch(
-                "/videos/" + videoId
-            );
-
-        if (!response.ok) {
-            console.error(
-                "Video preview metadata request failed:",
-                response.status,
-                response.statusText
-            );
-            return;
-        }
-
-        const videoData = await response.json();
-
-        const videoUrl =
-            videoData.videoUrl ||
-            videoData.videoURL ||
-            videoData.url;
-
-        if (!videoUrl) {
-            console.error(
-                "No video URL returned for video:",
-                videoId,
-                videoData
-            );
-            return;
-        }
-
-        videoElement.src = videoUrl;
-        videoElement.load();
-
-        videoElement.addEventListener(
-            "loadeddata",
-            () => {
-                videoElement.classList.add("loaded");
-            },
-            { once: true }
-        );
-
-    } catch (error) {
-        console.error(
-            "Error loading video preview:",
-            error
-        );
+function loadVideoPreview(videoElement, videoUrl) {
+    if (!videoElement || !videoUrl) {
+        return;
     }
+
+    videoElement.src = videoUrl;
+    videoElement.load();
+
+    videoElement.addEventListener(
+        "loadeddata",
+        () => {
+            videoElement.classList.add("loaded");
+        },
+        { once: true }
+    );
 }
 
 async function downloadVideo(videoId) {
@@ -847,35 +819,78 @@ function updateCounts() {
 }
 
 function showLoading() {
-    const loading = document.getElementById("videosLoading");
-    const grid = document.getElementById("generatedVideosGrid");
+    const loading =
+        document.getElementById(
+            "videosLoading"
+        );
 
-    if (loading) loading.hidden = false;
-    if (grid) grid.hidden = true;
+    const grid =
+        document.getElementById(
+            "generatedVideosGrid"
+        );
+
+    if (loading) {
+        loading.hidden = false;
+    }
+
+    if (grid) {
+        grid.hidden = true;
+    }
 
     hideEmptyState();
 }
 
 function hideLoading() {
-    const loading = document.getElementById("videosLoading");
-    const grid = document.getElementById("generatedVideosGrid");
+    const loading =
+        document.getElementById(
+            "videosLoading"
+        );
 
-    if (loading) loading.hidden = true;
-    if (grid) grid.hidden = false;
+    const grid =
+        document.getElementById(
+            "generatedVideosGrid"
+        );
+
+    if (loading) {
+        loading.hidden = true;
+    }
+
+    if (grid) {
+        grid.hidden = false;
+    }
 }
 
 function showEmptyState() {
     hideLoading();
-    const empty = document.getElementById("videosEmpty");
-    const grid = document.getElementById("generatedVideosGrid");
 
-    if (empty) empty.hidden = false;
-    if (grid) grid.hidden = true;
+    const empty =
+        document.getElementById(
+            "videosEmpty"
+        );
+
+    const grid =
+        document.getElementById(
+            "generatedVideosGrid"
+        );
+
+    if (empty) {
+        empty.hidden = false;
+    }
+
+    if (grid) {
+        grid.hidden = true;
+    }
 }
 
 function hideEmptyState() {
-    const empty = document.getElementById("videosEmpty");
-    if (empty) empty.hidden = true;
+    const empty =
+        document.getElementById(
+            "videosEmpty"
+        );
+
+    if (empty) {
+        empty.hidden = true;
+    }
 }
 
 function showError(message) {
@@ -974,5 +989,3 @@ function closeModal(modalId) {
         player.load();
     }
 }
-
-
