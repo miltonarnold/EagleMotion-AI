@@ -1,4 +1,4 @@
-const API_BASE = "";
+﻿const API_BASE = "";
 
 let allVideos = [];
 let currentFilter = "all";
@@ -279,7 +279,7 @@ function buildVideoCardHTML(
             '<video class="video-card-preview" ' +
             'muted playsinline preload="metadata">' +
             '<source src="' +
-            escapeHtml("/videos/" + videoId + "/download") +
+            escapeHtml(EagleMotionAuth.API_BASE_URL + "/videos/" + videoId + "/download") +
             '" type="video/mp4">' +
             "</video>";
     } else {
