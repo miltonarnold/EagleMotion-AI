@@ -431,47 +431,30 @@ async function loadVideoPreview(videoElement, videoId) {
             return;
         }
 
-        const response =
-            await fetch(
-                EagleMotionAuth.API_BASE_URL +
-                "/videos/" +
-                videoId +
-                "/download",
-                {
-                    method: "GET",
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
+        const videoUrl =
+            EagleMotionAuth.API_BASE_URL +
+            "/videos/" +
+            videoId +
+            "/download";
 
-        if (!response.ok) {
-            console.error(
-                "Video preview request failed:",
-                response.status,
-                response.statusText
-            );
-            return;
-        }
+        videoElement.src = videoUrl;
 
-        const blob =
-            await response.blob();
+        videoElement.setAttribute(
+            "playsinline",
+            ""
+        );
 
-        if (!blob || blob.size === 0) {
-            console.error(
-                "Video preview returned an empty file."
-            );
-            return;
-        }
+        videoElement.setAttribute(
+            "preload",
+            "metadata"
+        );
 
-        const objectUrl =
-            URL.createObjectURL(blob);
+        videoElement.style.width = "100%";
+        videoElement.style.height = "100%";
+        videoElement.style.objectFit = "cover";
+        videoElement.style.display = "block";
 
-        videoElement.src = objectUrl;
         videoElement.load();
-        videoElement.dataset.objectUrl =
-            objectUrl;
 
     } catch (error) {
         console.error(
