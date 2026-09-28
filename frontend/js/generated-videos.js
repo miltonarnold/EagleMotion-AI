@@ -113,25 +113,11 @@ function setupModals() {
         });
 }
 
-async function fetchVideosWithTimeout(timeoutMs = 30000) {
-    const controller = new AbortController();
-
-    const timeoutId = setTimeout(() => {
-        controller.abort();
-    }, timeoutMs);
-
-    try {
-        return await EagleMotionAuth.authenticatedFetch(
-            `${API_BASE}/videos`,
-            {
-                signal: controller.signal
-            }
-        );
-    } finally {
-        clearTimeout(timeoutId);
-    }
+async function fetchVideosWithTimeout() {
+    return await EagleMotionAuth.authenticatedFetch(
+        `${API_BASE}/videos`
+    );
 }
-
 
 async function loadGeneratedVideos() {
     showLoading();
@@ -759,30 +745,43 @@ function escapeAttribute(value) {
 }
 
 async function downloadVideo(videoId) {
-
     const video =
         allVideos.find(
-            v => Number(v.id) === Number(videoId)
+            (item) =>
+                Number(item.id) === Number(videoId)
         );
 
-    if (!video || !video.videoUrl) {
-        alert("Video download is unavailable.");
+    if (!video) {
+        alert("Video not found.");
         return;
     }
 
     try {
-
         const response =
             await EagleMotionAuth.authenticatedFetch(
                 `${API_BASE}/videos/${videoId}/download`
             );
 
         if (!response.ok) {
-            throw new Error("Download failed");
+            const errorText = await response.text();
+            console.error(
+                "Download response:",
+                response.status,
+                errorText
+            );
+            throw new Error(
+                `Download failed (${response.status})`
+            );
         }
 
         const blob =
             await response.blob();
+
+        if (!blob || blob.size === 0) {
+            throw new Error(
+                "The server returned an empty video file."
+            );
+        }
 
         const url =
             URL.createObjectURL(blob);
@@ -790,25 +789,25 @@ async function downloadVideo(videoId) {
         const link =
             document.createElement("a");
 
-        link.href = url;
-
-        link.download =
+        const filename =
             (video.title || "EagleMotion-Video")
                 .replace(/[^a-z0-9-_]/gi, "_")
-                + ".mp4";
+                .replace(/^_+|_+$/g, "") ||
+            "EagleMotion-Video";
+
+        link.href = url;
+        link.download = `${filename}.mp4`;
+        link.style.display = "none";
 
         document.body.appendChild(link);
-
         link.click();
-
         link.remove();
 
         setTimeout(() => {
             URL.revokeObjectURL(url);
-        }, 1000);
+        }, 5000);
 
     } catch (error) {
-
         console.error(
             "Video download failed:",
             error
