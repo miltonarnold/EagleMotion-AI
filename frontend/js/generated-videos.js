@@ -199,12 +199,6 @@ function createVideoCard(video) {
         createdAt
     );
 
-    const previewVideo = card.querySelector(".video-card-preview");
-
-    if (previewVideo && videoId) {
-        loadVideoPreview(previewVideo, videoId);
-    }
-
     card.addEventListener("click", () => {
         if (status === "completed" && videoUrl) {
             openVideoPlayer(video);
