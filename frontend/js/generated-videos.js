@@ -14,7 +14,7 @@ async function initializeGeneratedVideosPage() {
 }
 
 function setupTabs() {
-    const tabs = document.querySelectorAll(".video-tab");
+    const tabs = document.querySelectorAll(".video-filter");
 
     tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
@@ -48,7 +48,7 @@ function setupModals() {
     document.querySelectorAll(".modal").forEach((modal) => {
         modal.addEventListener("click", (event) => {
             if (event.target === modal) {
-                modal.classList.remove("show");
+                modal.hidden = true;
             }
         });
     });
@@ -103,6 +103,7 @@ async function loadGeneratedVideos() {
 }
 
 function renderVideos() {
+    hideLoading();
     const grid =
         document.getElementById("generatedVideosGrid");
 
@@ -497,7 +498,7 @@ function openVideoPlayer(video) {
     player.src = videoUrl;
     player.load();
 
-    modal.classList.add("show");
+    modal.hidden = false;
 }
 
 function openDeleteModal(videoId) {
@@ -513,7 +514,7 @@ function openDeleteModal(videoId) {
     modal.dataset.videoId =
         String(videoId);
 
-    modal.classList.add("show");
+    modal.hidden = false;
 
     const confirmButton =
         modal.querySelector(
@@ -591,7 +592,7 @@ function openRegenerateModal(video) {
     modal.dataset.videoId =
         String(video.id);
 
-    modal.classList.add("show");
+    modal.hidden = false;
 
     const confirmButton =
         modal.querySelector(
@@ -772,78 +773,35 @@ function updateCounts() {
 }
 
 function showLoading() {
-    const loading =
-        document.getElementById(
-            "videosLoading"
-        );
+    const loading = document.getElementById("videosLoading");
+    const grid = document.getElementById("generatedVideosGrid");
 
-    const grid =
-        document.getElementById(
-            "generatedVideosGrid"
-        );
-
-    if (loading) {
-        loading.style.display = "";
-    }
-
-    if (grid) {
-        grid.style.display = "none";
-    }
+    if (loading) loading.hidden = false;
+    if (grid) grid.hidden = true;
 
     hideEmptyState();
 }
 
 function hideLoading() {
-    const loading =
-        document.getElementById(
-            "videosLoading"
-        );
+    const loading = document.getElementById("videosLoading");
+    const grid = document.getElementById("generatedVideosGrid");
 
-    const grid =
-        document.getElementById(
-            "generatedVideosGrid"
-        );
-
-    if (loading) {
-        loading.style.display = "none";
-    }
-
-    if (grid) {
-        grid.style.display = "";
-    }
+    if (loading) loading.hidden = true;
+    if (grid) grid.hidden = false;
 }
 
 function showEmptyState() {
     hideLoading();
+    const empty = document.getElementById("videosEmpty");
+    const grid = document.getElementById("generatedVideosGrid");
 
-    const empty =
-        document.getElementById(
-            "videosEmpty"
-        );
-
-    const grid =
-        document.getElementById(
-            "generatedVideosGrid"
-        );
-
-    if (empty) {
-        empty.style.display = "";
-    }
-
-    if (grid) {
-        grid.style.display = "none";
-    }
+    if (empty) empty.hidden = false;
+    if (grid) grid.hidden = true;
 }
 
 function hideEmptyState() {
-    const empty =
-        document.getElementById(
-            "videosEmpty"
-        );
-
-    if (empty) {
-        empty.style.display = "none";
-    }
+    const empty = document.getElementById("videosEmpty");
+    if (empty) empty.hidden = true;
 }
 
 function showError(message) {
@@ -931,7 +889,7 @@ function closeModal(modalId) {
         return;
     }
 
-    modal.classList.remove("show");
+    modal.hidden = true;
 
     const player =
         modal.querySelector("video");
@@ -942,3 +900,9 @@ function closeModal(modalId) {
         player.load();
     }
 }
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    setupTabs();
+    loadGeneratedVideos();
+});
