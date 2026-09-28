@@ -431,28 +431,54 @@ async function loadVideoPreview(videoElement, videoId) {
             return;
         }
 
-        const videoUrl =
-            EagleMotionAuth.API_BASE_URL +
-            "/videos/" +
-            videoId +
-            "/download";
+        const response =
+            await fetch(
+                EagleMotionAuth.API_BASE_URL +
+                "/videos/" +
+                videoId +
+                "/download",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
 
-        videoElement.src = videoUrl;
+        if (!response.ok) {
+            console.error(
+                "Video preview request failed:",
+                response.status,
+                response.statusText
+            );
+            return;
+        }
 
-        videoElement.setAttribute(
-            "playsinline",
-            ""
-        );
+        const blob =
+            await response.blob();
 
-        videoElement.setAttribute(
-            "preload",
-            "metadata"
-        );
+        if (!blob || blob.size === 0) {
+            console.error(
+                "Video preview returned an empty file."
+            );
+            return;
+        }
+
+        const objectUrl =
+            URL.createObjectURL(blob);
+
+        videoElement.src = objectUrl;
+        videoElement.setAttribute("playsinline", "");
+        videoElement.setAttribute("preload", "metadata");
 
         videoElement.style.width = "100%";
         videoElement.style.height = "100%";
         videoElement.style.objectFit = "cover";
+        videoElement.style.objectPosition = "center";
         videoElement.style.display = "block";
+
+        videoElement.dataset.objectUrl = objectUrl;
 
         videoElement.load();
 
@@ -968,3 +994,4 @@ function closeModal(modalId) {
         player.load();
     }
 }
+
