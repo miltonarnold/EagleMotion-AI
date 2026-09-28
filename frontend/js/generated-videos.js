@@ -421,22 +421,58 @@ function escapeHtml(value) {
 
 async function loadVideoPreview(videoElement, videoId) {
     try {
-        const response = await EagleMotionAuth.authenticatedFetch(
-            "/videos/" + videoId + "/download"
-        );
+        const token =
+            EagleMotionAuth.getToken();
 
-        if (!response.ok) {
-            throw new Error(
-                "Video preview request failed: " + response.status
+        if (!token) {
+            console.error(
+                "No authentication token available for video preview."
             );
+            return;
         }
 
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
+        const response =
+            await fetch(
+                EagleMotionAuth.API_BASE_URL +
+                "/videos/" +
+                videoId +
+                "/download",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+        if (!response.ok) {
+            console.error(
+                "Video preview request failed:",
+                response.status,
+                response.statusText
+            );
+            return;
+        }
+
+        const blob =
+            await response.blob();
+
+        if (!blob || blob.size === 0) {
+            console.error(
+                "Video preview returned an empty file."
+            );
+            return;
+        }
+
+        const objectUrl =
+            URL.createObjectURL(blob);
 
         videoElement.src = objectUrl;
         videoElement.load();
-        videoElement.dataset.objectUrl = objectUrl;
+        videoElement.dataset.objectUrl =
+            objectUrl;
+
     } catch (error) {
         console.error(
             "Unable to load video preview:",
