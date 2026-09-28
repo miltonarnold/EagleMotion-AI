@@ -1,6 +1,7 @@
 package com.eaglemotion.backend.video;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -64,6 +65,7 @@ public class VideoController {
     @GetMapping("/{id}/download")
     public ResponseEntity<StreamingResponseBody> downloadVideo(
             @PathVariable Long id,
+            @RequestHeader(value = "Range", required = false) String range,
             Authentication authentication) {
 
         String videoUrl = videoService.getVideoDownloadUrl(
@@ -71,56 +73,134 @@ public class VideoController {
                 authentication.getName()
         );
 
-        StreamingResponseBody stream = outputStream -> {
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(videoUrl))
-                    .GET()
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
 
-            try {
+            HttpRequest.Builder requestBuilder =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(videoUrl))
+                            .GET();
 
-                HttpResponse<InputStream> response = client.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofInputStream()
-                );
+            if (range != null && !range.isBlank()) {
+                requestBuilder.header("Range", range);
+            }
 
-                if (response.statusCode() < 200 ||
-                        response.statusCode() >= 300) {
-
-                    throw new RuntimeException(
-                            "Unable to download video"
+            HttpResponse<InputStream> upstreamResponse =
+                    client.send(
+                            requestBuilder.build(),
+                            HttpResponse.BodyHandlers.ofInputStream()
                     );
+
+            int upstreamStatus =
+                    upstreamResponse.statusCode();
+
+            if (upstreamStatus != 200 &&
+                    upstreamStatus != 206) {
+
+                try {
+                    upstreamResponse.body().close();
+                } catch (Exception ignored) {
                 }
 
-                try (InputStream inputStream = response.body()) {
-                    inputStream.transferTo(outputStream);
+                return ResponseEntity
+                        .status(upstreamStatus)
+                        .build();
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+
+            headers.set(
+                    HttpHeaders.ACCEPT_RANGES,
+                    "bytes"
+            );
+
+            headers.set(
+                    HttpHeaders.CONTENT_TYPE,
+                    "video/mp4"
+            );
+
+            String contentLength =
+                    upstreamResponse.headers()
+                            .firstValue(HttpHeaders.CONTENT_LENGTH)
+                            .orElse(null);
+
+            if (contentLength != null) {
+                try {
+                    headers.setContentLength(
+                            Long.parseLong(contentLength)
+                    );
+                } catch (NumberFormatException ignored) {
                 }
+            }
 
-            } catch (InterruptedException e) {
+            String contentRange =
+                    upstreamResponse.headers()
+                            .firstValue(HttpHeaders.CONTENT_RANGE)
+                            .orElse(null);
 
-                Thread.currentThread().interrupt();
-
-                throw new RuntimeException(
-                        "Video download was interrupted",
-                        e
+            if (contentRange != null) {
+                headers.set(
+                        HttpHeaders.CONTENT_RANGE,
+                        contentRange
                 );
             }
-        };
 
-        return ResponseEntity.ok()
-                .contentType(
-                        MediaType.parseMediaType("video/mp4")
-                )
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"EagleMotion-Video-"
-                                + id
-                                + ".mp4\""
-                )
-                .body(stream);
+            headers.set(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    "inline; filename=\"EagleMotion-Video-"
+                            + id
+                            + ".mp4\""
+            );
+
+            StreamingResponseBody stream =
+                    outputStream -> {
+
+                        try (InputStream inputStream =
+                                     upstreamResponse.body()) {
+
+                            inputStream.transferTo(
+                                    outputStream
+                            );
+
+                        } catch (Exception e) {
+
+                            if (e instanceof InterruptedException) {
+                                Thread.currentThread().interrupt();
+                            }
+
+                            throw new RuntimeException(
+                                    "Video streaming was interrupted",
+                                    e
+                            );
+                        }
+                    };
+
+            HttpStatus status =
+                    upstreamStatus == 206
+                            ? HttpStatus.PARTIAL_CONTENT
+                            : HttpStatus.OK;
+
+            return ResponseEntity
+                    .status(status)
+                    .headers(headers)
+                    .body(stream);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+
+        } catch (Exception e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
     }
 
     @DeleteMapping("/{id}")
