@@ -124,9 +124,33 @@ function renderVideos() {
     hideEmptyState();
 
     filteredVideos.forEach((video) => {
-        grid.appendChild(
-            createVideoCard(video)
-        );
+        const card = createVideoCard(video);
+        grid.appendChild(card);
+
+        const status =
+            video.status ||
+            video.state ||
+            "";
+
+        const videoId =
+            video.id ||
+            video.videoId ||
+            "";
+
+        if (
+            status.toLowerCase() === "completed" &&
+            videoId
+        ) {
+            const previewVideo =
+                card.querySelector(".video-card-preview");
+
+            if (previewVideo) {
+                loadVideoPreview(
+                    previewVideo,
+                    videoId
+                );
+            }
+        }
     });
 }
 
