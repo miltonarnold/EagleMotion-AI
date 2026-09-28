@@ -113,14 +113,32 @@ function setupModals() {
         });
 }
 
+async function fetchVideosWithTimeout(timeoutMs = 30000) {
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, timeoutMs);
+
+    try {
+        return await EagleMotionAuth.authenticatedFetch(
+            `${API_BASE}/videos`,
+            {
+                signal: controller.signal
+            }
+        );
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+
 async function loadGeneratedVideos() {
     showLoading();
 
     try {
         const response =
-            await EagleMotionAuth.authenticatedFetch(
-                `${API_BASE}/videos`
-            );
+            await fetchVideosWithTimeout();
 
         if (!response.ok) {
             throw new Error(
@@ -135,10 +153,17 @@ async function loadGeneratedVideos() {
         startProcessingRefresh();
 
     } catch (error) {
-        console.error(error);
-        showError(
-            "Unable to load your generated videos."
-        );
+        console.error("Generated videos load failed:", error);
+
+        if (error.name === "AbortError") {
+            showError(
+                "The server took too long to respond. Please refresh the page and try again."
+            );
+        } else {
+            showError(
+                "Unable to load your generated videos."
+            );
+        }
     }
 }
 
@@ -600,9 +625,7 @@ function startProcessingRefresh() {
 async function refreshVideoStatus() {
     try {
         const response =
-            await EagleMotionAuth.authenticatedFetch(
-                `${API_BASE}/videos`
-            );
+            await fetchVideosWithTimeout();
 
         if (!response.ok) {
             return;
