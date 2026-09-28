@@ -900,9 +900,3 @@ function closeModal(modalId) {
         player.load();
     }
 }
-
-
-window.addEventListener('DOMContentLoaded', () => {
-    setupTabs();
-    loadGeneratedVideos();
-});
