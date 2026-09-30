@@ -1,5 +1,4 @@
-﻿```javascript
-/*
+﻿/*
  * EagleMotion AI
  * Dashboard JavaScript
  *
@@ -559,32 +558,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        container.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <div class="dashboard-empty-icon">
-                    E
-                </div>
-
-                <h3>
-                    No videos yet
-                </h3>
-
-                <p>
-                    Your generated videos will appear here.
-                </p>
-
-                <a
-                    href="studio.html"
-                    class="small-button"
-                >
-                    Create your first video
-                </a>
-
-            </div>
-
-        `;
+        container.innerHTML =
+            '<div class="dashboard-empty-state">' +
+                '<div class="dashboard-empty-icon">E</div>' +
+                '<h3>No videos yet</h3>' +
+                '<p>Your generated videos will appear here.</p>' +
+                '<a href="studio.html" class="small-button">Create your first video</a>' +
+            '</div>';
 
     }
 
@@ -659,55 +639,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         /*
          * Build the card.
          */
-
-        card.innerHTML = `
-
-            <div class="dashboard-video-thumbnail">
-
-                ${
-                    videoUrl
-                    ?
-                    `
-                    <video
-                        src="${escapeHtml(videoUrl)}"
-                        muted
-                        playsinline
-                        preload="metadata"
-                    ></video>
-                    `
-                    :
-                    `
-                    <div class="dashboard-video-placeholder">
-                        E
-                    </div>
-                    `
-                }
-
-            </div>
-
-            <div class="dashboard-video-info">
-
-                <h3>
-                    ${escapeHtml(title)}
-                </h3>
-
-                <span>
-                    ${escapeHtml(date)}
-                </span>
-
-            </div>
-
-            <button
-                type="button"
-                class="dashboard-video-menu"
-                data-video-id="${escapeHtml(video.id || "")}"
-                aria-label="Video actions"
-            >
-                More
-            </button>
-
-        `;
-
+        card.innerHTML =
+            '<div class="dashboard-video-thumbnail">' +
+                (videoUrl
+                    ? '<video src="' + escapeHtml(videoUrl) + '" muted playsinline preload="metadata"></video>'
+                    : '<div class="dashboard-video-placeholder">E</div>') +
+            '</div>' +
+            '<div class="dashboard-video-info">' +
+                '<h3>' + escapeHtml(title) + '</h3>' +
+                '<span>' + escapeHtml(date) + '</span>' +
+            '</div>';
         /*
          * More button.
          */
@@ -800,47 +741,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         menu.className =
             "video-actions-menu";
-
-        menu.innerHTML = `
-
-            <div
-                class="video-actions-card"
-                role="dialog"
-                aria-modal="true"
-            >
-
-                <button
-                    type="button"
-                    data-action="open"
-                >
-                    Open Video
-                </button>
-
-                <button
-                    type="button"
-                    data-action="download"
-                >
-                    Download
-                </button>
-
-                <button
-                    type="button"
-                    data-action="delete"
-                >
-                    Delete
-                </button>
-
-                <button
-                    type="button"
-                    data-action="close"
-                >
-                    Cancel
-                </button>
-
-            </div>
-
-        `;
-
+        menu.innerHTML =
+            '<div class="video-actions-card" role="dialog" aria-modal="true">' +
+                '<button type="button" data-action="open">Open Video</button>' +
+                '<button type="button" data-action="download">Download</button>' +
+                '<button type="button" data-action="delete">Delete</button>' +
+                '<button type="button" data-action="cancel">Cancel</button>' +
+            '</div>';
         document.body.appendChild(
             menu
         );
@@ -1632,3 +1539,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
+
+
+
+
