@@ -1139,7 +1139,7 @@
 
                         <div class="progress-bar">
 
-                            <div class="progress-fill"></div>
+                            <div class="progress-fill" data-credit-progress></div>
 
                         </div>
 
@@ -1374,110 +1374,13 @@
                 element.textContent =
                     user.email || "";
 
-            });
-            /*
-             * Load saved/generated videos.
-             */
-
-            const token =
-                localStorage.getItem("eagleMotionToken");
-
-            const videosPanel =
-                document.querySelector("#videos");
-
-            if (token && videosPanel) {
-
-                try {
-
-                    const response =
-                        await fetch(
-                            "https://eaglemotion-backend.onrender.com/api/videos",
-                            {
-                                headers: {
-                                    "Authorization":
-                                        "Bearer " + token
-                                }
-                            }
-                        );
-
-                    if (response.ok) {
-
-                        const videos =
-                            await response.json();
-
-                        const emptyState =
-                            videosPanel.querySelector(
-                                ".empty-videos"
-                            );
-
-                        if (videos.length > 0) {
-
-                            if (emptyState) {
-                                emptyState.remove();
-                            }
-
-                            const videoList =
-                                document.createElement("div");
-
-                            videoList.className =
-                                "dashboard-video-list";
-
-                            videos.forEach(video => {
-
-                                const item =
-                                    document.createElement("div");
-
-                                item.className =
-                                    "dashboard-video-item";
-
-                                item.innerHTML = `
-                                    <video
-                                        controls
-                                        preload="metadata"
-                                        src="${video.videoUrl || ""}"
-                                    ></video>
-
-                                    <div class="dashboard-video-info">
-
-                                        <h3>
-                                            ${video.title || "Untitled Video"}
-                                        </h3>
-
-                                        <p>
-                                            ${video.prompt || ""}
-                                        </p>
-
-                                        <span>
-                                            ${video.status || ""}
-                                        </span>
-
-                                    </div>
-                                `;
-
-                                videoList.appendChild(item);
-
-                            });
-
-                            videosPanel.appendChild(videoList);
-                        }
-                    }
-
-                } catch (error) {
-
-                    console.error(
-                        "Failed to load saved videos:",
-                        error
-                    );
-
-                }
-
-            }
-
-        });
+            });});
 
     </script>
 
 </body>
 
 </html>
+
+
 
