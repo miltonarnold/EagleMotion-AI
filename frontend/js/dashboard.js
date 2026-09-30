@@ -1,3 +1,4 @@
+﻿```javascript
 /*
  * EagleMotion AI
  * Dashboard JavaScript
@@ -22,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const auth = window.EagleMotionAuth;
 
     if (!auth) {
-
         console.error(
             "EagleMotion authentication system is not available."
         );
@@ -31,35 +31,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-
     if (!auth.isLoggedIn()) {
-
         window.location.href = "login.html";
         return;
     }
-
 
     console.log(
         "EagleMotion AI dashboard connected to backend."
     );
 
+    // ==========================================
+    // DASHBOARD DATA
+    // ==========================================
+
+    let dashboardData = {
+        videos: [],
+        projects: [],
+        credits: 10
+    };
 
     // ==========================================
     // GET CURRENT USER
     // ==========================================
 
     const currentUser =
-        auth.getLoggedInUser();
-
+        typeof auth.getLoggedInUser === "function"
+            ? auth.getLoggedInUser()
+            : null;
 
     // ==========================================
     // DISPLAY USER INFORMATION
     // ==========================================
 
-    updateUserInformation(
-        currentUser
-    );
-
+    updateUserInformation(currentUser);
 
     function updateUserInformation(user) {
 
@@ -67,47 +71,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-
         document
-            .querySelectorAll(
-                "[data-user-name]"
-            )
+            .querySelectorAll("[data-user-name]")
             .forEach(element => {
-
                 element.textContent =
                     user.name || "User";
-
             });
 
-
         document
-            .querySelectorAll(
-                "[data-user-email]"
-            )
+            .querySelectorAll("[data-user-email]")
             .forEach(element => {
-
                 element.textContent =
                     user.email || "";
-
             });
 
-
         document
-            .querySelectorAll(
-                "[data-user-role]"
-            )
+            .querySelectorAll("[data-user-role]")
             .forEach(element => {
-
                 element.textContent =
                     user.role || "USER";
-
             });
 
-
         document
-            .querySelectorAll(
-                "[data-user-avatar]"
-            )
+            .querySelectorAll("[data-user-avatar]")
             .forEach(element => {
 
                 const name =
@@ -117,70 +103,68 @@ document.addEventListener("DOMContentLoaded", async () => {
                     name
                         .charAt(0)
                         .toUpperCase();
-
             });
-
     }
 
-
     // ==========================================
-    // DASHBOARD DATA
-    // ==========================================
-
-    let dashboardData = {
-
-        videos: [],
-
-        projects: [],
-
-        credits: 10
-
-    };
-
-
-    // ==========================================
-    // LOAD DASHBOARD DATA
+    // LOAD DASHBOARD
     // ==========================================
 
     await loadDashboardData();
 
-
     async function loadDashboardData() {
 
         try {
+
+            if (
+                !auth ||
+                typeof auth.authenticatedFetch !== "function"
+            ) {
+                throw new Error(
+                    "Authentication service is unavailable."
+                );
+            }
 
             const response =
                 await auth.authenticatedFetch(
                     "/videos"
                 );
 
-
             if (!response.ok) {
 
                 throw new Error(
-                    "Failed to load your videos."
+                    "Failed to load your videos (" +
+                    response.status +
+                    ")."
                 );
-
             }
 
-
-            const videos =
+            const data =
                 await response.json();
 
+            /*
+             * The backend currently returns
+             * an array of videos.
+             */
+
+            const videos =
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(data.videos)
+                        ? data.videos
+                        : [];
 
             dashboardData = {
 
                 videos:
-                    Array.isArray(videos)
-                        ? videos
-                        : [],
+                    videos,
 
                 projects: [],
 
-                credits: 10
+                credits:
+                    dashboardData.credits ?? 10
 
             };
-
 
         } catch (error) {
 
@@ -190,55 +174,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             /*
-             * Do not destroy already loaded videos
-             * if a later refresh temporarily fails.
+             * Keep existing dashboard data if
+             * a refresh temporarily fails.
              */
 
-            dashboardData = {
-
-                videos:
-                    Array.isArray(
-                        dashboardData.videos
-                    )
-                        ? dashboardData.videos
-                        : [],
-
-                projects:
-                    Array.isArray(
-                        dashboardData.projects
-                    )
-                        ? dashboardData.projects
-                        : [],
-
-                credits:
-                    dashboardData.credits ?? 10
-
-            };
-
         }
-
 
         updateDashboardStatistics(
             dashboardData
         );
 
+        updateCredits(
+            dashboardData.credits
+        );
 
         renderRecentVideos(
             dashboardData.videos
         );
 
-        setTimeout(
-            limitDashboardVideoList,
-            1000
-        );
-
-
-        updateCredits(
-            dashboardData.credits
-        );
-
     }
-
 
     // ==========================================
     // DASHBOARD STATISTICS
@@ -251,18 +205,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? data.videos
                 : [];
 
-
         const projects =
             Array.isArray(data.projects)
                 ? data.projects
                 : [];
 
-
         const statCards =
             document.querySelectorAll(
                 ".dashboard-stats .stat-card"
             );
-
 
         // ------------------------------------------
         // VIDEOS CREATED
@@ -270,30 +221,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (statCards.length >= 1) {
 
-            const card =
-                statCards[0];
-
-            const elements =
-                card.querySelectorAll("*");
-
-
-            elements.forEach(element => {
-
-                const text =
-                    element.textContent.trim();
-
-
-                if (text === "0") {
-
-                    element.textContent =
-                        videos.length;
-
-                }
-
-            });
+            updateStatCardValue(
+                statCards[0],
+                videos.length
+            );
 
         }
-
 
         // ------------------------------------------
         // SAVED PROJECTS
@@ -301,30 +234,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (statCards.length >= 2) {
 
-            const card =
-                statCards[1];
-
-            const elements =
-                card.querySelectorAll("*");
-
-
-            elements.forEach(element => {
-
-                const text =
-                    element.textContent.trim();
-
-
-                if (text === "0") {
-
-                    element.textContent =
-                        projects.length;
-
-                }
-
-            });
+            updateStatCardValue(
+                statCards[1],
+                projects.length
+            );
 
         }
-
 
         // ------------------------------------------
         // GENERATION CREDITS
@@ -332,32 +247,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (statCards.length >= 3) {
 
-            const card =
-                statCards[2];
-
-            const elements =
-                card.querySelectorAll("*");
-
-
-            elements.forEach(element => {
-
-                const text =
-                    element.textContent.trim();
-
-
-                if (text === "--") {
-
-                    element.textContent =
-                        data.credits ?? 0;
-
-                }
-
-            });
+            updateStatCardValue(
+                statCards[2],
+                data.credits ?? 0
+            );
 
         }
 
     }
 
+    function updateStatCardValue(
+        card,
+        value
+    ) {
+
+        if (!card) {
+            return;
+        }
+
+        /*
+         * Prefer common stat-number selectors
+         * if they exist in the dashboard HTML.
+         */
+
+        const preferred =
+            card.querySelector(
+                ".stat-value, .stat-number, [data-stat-value]"
+            );
+
+        if (preferred) {
+
+            preferred.textContent =
+                value;
+
+            return;
+        }
+
+        /*
+         * Fallback:
+         * Replace an existing numeric placeholder.
+         */
+
+        const elements =
+            card.querySelectorAll("*");
+
+        for (const element of elements) {
+
+            const text =
+                element.textContent.trim();
+
+            if (
+                text === "0" ||
+                text === "--"
+            ) {
+
+                element.textContent =
+                    value;
+
+                return;
+            }
+
+        }
+
+    }
 
     // ==========================================
     // CREDITS
@@ -367,27 +319,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         credits
     ) {
 
+        const safeCredits =
+            Number.isFinite(
+                Number(credits)
+            )
+                ? Number(credits)
+                : 0;
+
         const creditElements =
             document.querySelectorAll(
                 "[data-credit-count]"
             );
 
-
         creditElements.forEach(
             element => {
 
                 element.textContent =
-                    credits;
+                    safeCredits;
 
             }
         );
-
 
         const creditProgress =
             document.querySelector(
                 "[data-credit-progress]"
             );
-
 
         if (creditProgress) {
 
@@ -396,124 +352,179 @@ document.addEventListener("DOMContentLoaded", async () => {
                     100,
                     Math.max(
                         0,
-                        (credits / 10) * 100
+                        (safeCredits / 10) * 100
                     )
                 );
 
-
             creditProgress.style.width =
-                `${percentage}%`;
+                percentage + "%";
 
         }
 
     }
-
 
     // ==========================================
     // RECENT VIDEOS
     // ==========================================
 
     function renderRecentVideos(
-    videoList
-) {
+        videoList
+    ) {
 
-    let container =
-        document.querySelector(
-            "#recentVideos, [data-recent-videos]"
-        );
-
-    if (!container) {
-
-        const panels =
-            document.querySelectorAll(
-                ".dashboard-panel"
+        let container =
+            document.querySelector(
+                "#recentVideos, [data-recent-videos]"
             );
 
-        const recentPanel =
-            [...panels].find(panel =>
-                panel.textContent
-                    .toLowerCase()
-                    .includes("recent videos")
+        /*
+         * If the HTML does not already contain
+         * the recent videos container, create it
+         * inside the Recent Videos panel.
+         */
+
+        if (!container) {
+
+            const panels =
+                document.querySelectorAll(
+                    ".dashboard-panel"
+                );
+
+            const recentPanel =
+                [...panels].find(
+                    panel =>
+                        panel.textContent
+                            .toLowerCase()
+                            .includes(
+                                "recent videos"
+                            )
+                );
+
+            if (!recentPanel) {
+                console.warn(
+                    "Recent Videos dashboard panel was not found."
+                );
+
+                return;
+            }
+
+            container =
+                document.createElement(
+                    "div"
+                );
+
+            container.id =
+                "recentVideos";
+
+            recentPanel.appendChild(
+                container
             );
 
-        if (!recentPanel) {
+        }
+
+        /*
+         * Always remove the old See More button
+         * before rebuilding the list.
+         */
+
+        const existingSeeMore =
+            container.parentElement
+                ? container.parentElement.querySelector(
+                    ".dashboard-see-more"
+                )
+                : null;
+
+        if (existingSeeMore) {
+            existingSeeMore.remove();
+        }
+
+        /*
+         * Empty state.
+         */
+
+        if (
+            !Array.isArray(videoList) ||
+            videoList.length === 0
+        ) {
+
+            renderEmptyVideos(
+                container
+            );
+
             return;
         }
 
-        container =
-            document.createElement("div");
+        /*
+         * Clear old cards.
+         */
 
-        container.id =
-            "recentVideos";
+        container.innerHTML =
+            "";
 
-        recentPanel.appendChild(
-            container
-        );
-    }
+        /*
+         * Dashboard shows ONLY the four
+         * most recent videos.
+         */
 
-    if (
-        !Array.isArray(videoList) ||
-        videoList.length === 0
-    ) {
-        renderEmptyVideos(container);
-        return;
-    }
+        const recentVideos =
+            videoList.slice(0, 4);
 
-    container.innerHTML = "";
+        recentVideos.forEach(
+            video => {
 
-    videoList
-        .slice(0, 4)
-        .forEach(video => {
-            const card =
-                createVideoCard(
-                    video
+                const card =
+                    createVideoCard(
+                        video
+                    );
+
+                container.appendChild(
+                    card
                 );
 
-            container.appendChild(
-                card
+            }
+        );
+
+        /*
+         * Show See More when there are
+         * more than four videos.
+         */
+
+        if (
+            videoList.length > 4 &&
+            container.parentElement
+        ) {
+
+            createSeeMoreButton(
+                container.parentElement
             );
-        });
-}
 
-function limitDashboardVideoList() {
+        }
 
-    const list =
-        document.querySelector(
-            ".dashboard-video-list"
-        );
-
-    if (!list) {
-        setTimeout(
-            limitDashboardVideoList,
-            300
-        );
-        return;
     }
 
-    const videos =
-        [...list.querySelectorAll(
-            ".dashboard-video-item"
-        )];
+    // ==========================================
+    // SEE MORE BUTTON
+    // ==========================================
 
-    if (videos.length === 0) {
-        setTimeout(
-            limitDashboardVideoList,
-            300
-        );
-        return;
-    }
-
-    videos
-        .slice(4)
-        .forEach(video => video.remove());
-
-    if (
-        !list.parentElement.querySelector(
-            ".dashboard-see-more"
-        )
+    function createSeeMoreButton(
+        parent
     ) {
+
+        if (!parent) {
+            return;
+        }
+
+        if (
+            parent.querySelector(
+                ".dashboard-see-more"
+            )
+        ) {
+            return;
+        }
+
         const seeMore =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
         seeMore.href =
             "generated-videos.html";
@@ -530,20 +541,23 @@ function limitDashboardVideoList() {
         seeMore.style.marginTop =
             "20px";
 
-        list.parentElement.appendChild(
+        parent.appendChild(
             seeMore
         );
-    }
-}
 
-// ==========================================
-// EMPTY VIDEO STATE
-// ==========================================
+    }
+
+    // ==========================================
+    // EMPTY VIDEO STATE
     // ==========================================
 
     function renderEmptyVideos(
         container
     ) {
+
+        if (!container) {
+            return;
+        }
 
         container.innerHTML = `
 
@@ -574,7 +588,6 @@ function limitDashboardVideoList() {
 
     }
 
-
     // ==========================================
     // CREATE VIDEO CARD
     // ==========================================
@@ -588,38 +601,64 @@ function limitDashboardVideoList() {
                 "div"
             );
 
-
         card.className =
             "dashboard-video-card";
 
-        card.style.cursor = "pointer";
+        card.style.cursor =
+            "pointer";
 
-        card.addEventListener(
-            "click",
-            () => {
-                window.location.href =
-                    "generated-videos.html";
-            }
-        );
+        /*
+         * Normalize possible backend URL names.
+         */
 
-
+        const videoUrl =
+            video.videoUrl ||
+            video.videoURL ||
+            video.url ||
+            "";
 
         const title =
             video.title ||
+            video.prompt ||
             "Untitled Video";
-
 
         const date =
             formatDate(
-                video.createdAt
+                video.createdAt ||
+                video.created_at
             );
 
+        /*
+         * Clicking the card opens
+         * the Generated Videos page.
+         */
 
-        const videoUrl =
-            video.url ||
-            video.videoUrl ||
-            "";
+        card.addEventListener(
+            "click",
+            event => {
 
+                /*
+                 * Do not redirect when the
+                 * More button was clicked.
+                 */
+
+                if (
+                    event.target.closest(
+                        ".dashboard-video-menu"
+                    )
+                ) {
+                    return;
+                }
+
+                window.location.href =
+                    "generated-videos.html";
+
+            }
+        );
+
+        /*
+         * Build the card.
+         */
 
         card.innerHTML = `
 
@@ -632,8 +671,9 @@ function limitDashboardVideoList() {
                     <video
                         src="${escapeHtml(videoUrl)}"
                         muted
-                        preload="metadata">
-                    </video>
+                        playsinline
+                        preload="metadata"
+                    ></video>
                     `
                     :
                     `
@@ -645,7 +685,6 @@ function limitDashboardVideoList() {
 
             </div>
 
-
             <div class="dashboard-video-info">
 
                 <h3>
@@ -653,34 +692,40 @@ function limitDashboardVideoList() {
                 </h3>
 
                 <span>
-                    ${date}
+                    ${escapeHtml(date)}
                 </span>
 
             </div>
-
 
             <button
                 type="button"
                 class="dashboard-video-menu"
                 data-video-id="${escapeHtml(video.id || "")}"
+                aria-label="Video actions"
             >
                 More
             </button>
 
         `;
 
+        /*
+         * More button.
+         */
 
         const menuButton =
             card.querySelector(
                 ".dashboard-video-menu"
             );
 
-
         if (menuButton) {
 
             menuButton.addEventListener(
                 "click",
-                () => {
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
 
                     showVideoActions(
                         video
@@ -691,11 +736,37 @@ function limitDashboardVideoList() {
 
         }
 
+        /*
+         * Prevent video interaction from
+         * accidentally opening the page.
+         */
+
+        const preview =
+            card.querySelector(
+                ".dashboard-video-thumbnail video"
+            );
+
+        if (preview) {
+
+            preview.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    window.location.href =
+                        "generated-videos.html";
+
+                }
+            );
+
+        }
 
         return card;
 
     }
-
 
     // ==========================================
     // VIDEO ACTIONS
@@ -705,30 +776,38 @@ function limitDashboardVideoList() {
         video
     ) {
 
+        /*
+         * Remove an existing menu first.
+         */
+
         const existing =
             document.querySelector(
                 ".video-actions-menu"
             );
 
-
         if (existing) {
             existing.remove();
         }
 
+        /*
+         * Create overlay.
+         */
 
         const menu =
             document.createElement(
                 "div"
             );
 
-
         menu.className =
             "video-actions-menu";
 
-
         menu.innerHTML = `
 
-            <div class="video-actions-card">
+            <div
+                class="video-actions-card"
+                role="dialog"
+                aria-modal="true"
+            >
 
                 <button
                     type="button"
@@ -737,7 +816,6 @@ function limitDashboardVideoList() {
                     Open Video
                 </button>
 
-
                 <button
                     type="button"
                     data-action="download"
@@ -745,14 +823,12 @@ function limitDashboardVideoList() {
                     Download
                 </button>
 
-
                 <button
                     type="button"
                     data-action="delete"
                 >
                     Delete
                 </button>
-
 
                 <button
                     type="button"
@@ -765,24 +841,45 @@ function limitDashboardVideoList() {
 
         `;
 
-
         document.body.appendChild(
             menu
         );
 
+        /*
+         * Handle actions.
+         */
 
         menu.addEventListener(
             "click",
             async event => {
 
-                const action =
-                    event.target.dataset.action;
+                event.stopPropagation();
 
+                /*
+                 * Clicking the dark overlay closes
+                 * the menu.
+                 */
 
-                if (!action) {
+                if (
+                    event.target === menu
+                ) {
+
+                    menu.remove();
+
                     return;
                 }
 
+                const button =
+                    event.target.closest(
+                        "[data-action]"
+                    );
+
+                if (!button) {
+                    return;
+                }
+
+                const action =
+                    button.dataset.action;
 
                 if (action === "open") {
 
@@ -795,7 +892,6 @@ function limitDashboardVideoList() {
                     return;
                 }
 
-
                 if (action === "download") {
 
                     downloadVideo(
@@ -806,7 +902,6 @@ function limitDashboardVideoList() {
 
                     return;
                 }
-
 
                 if (action === "delete") {
 
@@ -819,7 +914,6 @@ function limitDashboardVideoList() {
                     return;
                 }
 
-
                 if (action === "close") {
 
                     menu.remove();
@@ -829,8 +923,34 @@ function limitDashboardVideoList() {
             }
         );
 
-    }
+        /*
+         * Allow Escape to close the menu.
+         */
 
+        const escapeHandler =
+            event => {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    menu.remove();
+
+                    document.removeEventListener(
+                        "keydown",
+                        escapeHandler
+                    );
+
+                }
+
+            };
+
+        document.addEventListener(
+            "keydown",
+            escapeHandler
+        );
+
+    }
 
     // ==========================================
     // OPEN VIDEO
@@ -841,10 +961,10 @@ function limitDashboardVideoList() {
     ) {
 
         const videoUrl =
-            video.url ||
             video.videoUrl ||
+            video.videoURL ||
+            video.url ||
             "";
-
 
         if (!videoUrl) {
 
@@ -855,14 +975,13 @@ function limitDashboardVideoList() {
             return;
         }
 
-
         window.open(
             videoUrl,
-            "_blank"
+            "_blank",
+            "noopener,noreferrer"
         );
 
     }
-
 
     // ==========================================
     // DOWNLOAD VIDEO
@@ -873,10 +992,10 @@ function limitDashboardVideoList() {
     ) {
 
         const videoUrl =
-            video.url ||
             video.videoUrl ||
+            video.videoURL ||
+            video.url ||
             "";
-
 
         if (!videoUrl) {
 
@@ -887,36 +1006,35 @@ function limitDashboardVideoList() {
             return;
         }
 
-
         const link =
             document.createElement(
                 "a"
             );
 
-
         link.href =
             videoUrl;
 
-
         link.download =
-            `${sanitizeFilename(
+            sanitizeFilename(
                 video.title ||
                 "eaglemotion-video"
-            )}.mp4`;
+            ) + ".mp4";
 
+        link.target =
+            "_blank";
+
+        link.rel =
+            "noopener";
 
         document.body.appendChild(
             link
         );
 
-
         link.click();
-
 
         link.remove();
 
     }
-
 
     // ==========================================
     // DELETE VIDEO
@@ -931,24 +1049,101 @@ function limitDashboardVideoList() {
                 "Delete this video from your dashboard?"
             );
 
-
         if (!confirmed) {
             return;
         }
 
-
         /*
-         * The real DELETE endpoint will be connected
-         * after the Video entity and VideoController
-         * are added to Spring Boot.
+         * Use the existing authenticated backend
+         * DELETE endpoint when a video ID exists.
          */
 
-        showDashboardToast(
-            "Video deletion will be connected to the backend."
-        );
+        if (
+            !video ||
+            !video.id
+        ) {
+
+            showDashboardToast(
+                "This video cannot be deleted because its ID is missing."
+            );
+
+            return;
+        }
+
+        try {
+
+            if (
+                !auth ||
+                typeof auth.authenticatedFetch !==
+                    "function"
+            ) {
+
+                throw new Error(
+                    "Authentication service is unavailable."
+                );
+
+            }
+
+            const response =
+                await auth.authenticatedFetch(
+                    "/videos/" +
+                    encodeURIComponent(
+                        video.id
+                    ),
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Delete failed (" +
+                    response.status +
+                    ")."
+                );
+
+            }
+
+            /*
+             * Remove the deleted video locally
+             * without reloading the entire page.
+             */
+
+            dashboardData.videos =
+                dashboardData.videos.filter(
+                    item =>
+                        String(item.id) !==
+                        String(video.id)
+                );
+
+            updateDashboardStatistics(
+                dashboardData
+            );
+
+            renderRecentVideos(
+                dashboardData.videos
+            );
+
+            showDashboardToast(
+                "Video deleted successfully."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard video deletion failed:",
+                error
+            );
+
+            showDashboardToast(
+                error.message ||
+                "Unable to delete this video."
+            );
+
+        }
 
     }
-
 
     // ==========================================
     // DATE FORMAT
@@ -962,12 +1157,10 @@ function limitDashboardVideoList() {
             return "Recently";
         }
 
-
         const date =
             new Date(
                 dateString
             );
-
 
         if (
             Number.isNaN(
@@ -978,7 +1171,6 @@ function limitDashboardVideoList() {
             return "Recently";
 
         }
-
 
         return date.toLocaleDateString(
             undefined,
@@ -991,7 +1183,6 @@ function limitDashboardVideoList() {
 
     }
 
-
     // ==========================================
     // ESCAPE HTML
     // ==========================================
@@ -1000,7 +1191,9 @@ function limitDashboardVideoList() {
         value
     ) {
 
-        return String(value)
+        return String(
+            value ?? ""
+        )
             .replace(
                 /&/g,
                 "&amp;"
@@ -1024,7 +1217,6 @@ function limitDashboardVideoList() {
 
     }
 
-
     // ==========================================
     // SANITIZE FILE NAME
     // ==========================================
@@ -1033,7 +1225,9 @@ function limitDashboardVideoList() {
         value
     ) {
 
-        return String(value)
+        return String(
+            value || ""
+        )
             .replace(
                 /[<>:"/\\|?*]/g,
                 ""
@@ -1046,11 +1240,11 @@ function limitDashboardVideoList() {
             .substring(
                 0,
                 100
-            ) ||
+            )
+            ||
             "eaglemotion-video";
 
     }
-
 
     // ==========================================
     // CREATE VIDEO BUTTONS
@@ -1060,22 +1254,23 @@ function limitDashboardVideoList() {
         .querySelectorAll(
             "[data-create-video]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                event => {
+                button.addEventListener(
+                    "click",
+                    event => {
 
-                    event.preventDefault();
+                        event.preventDefault();
 
-                    window.location.href =
-                        "studio.html";
+                        window.location.href =
+                            "studio.html";
 
-                }
-            );
+                    }
+                );
 
-        });
-
+            }
+        );
 
     // ==========================================
     // DASHBOARD LOGOUT
@@ -1085,24 +1280,33 @@ function limitDashboardVideoList() {
         .querySelectorAll(
             "[data-dashboard-logout]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                event => {
+                button.addEventListener(
+                    "click",
+                    event => {
 
-                    event.preventDefault();
+                        event.preventDefault();
 
-                    auth.clearSession();
+                        if (
+                            auth &&
+                            typeof auth.clearSession ===
+                                "function"
+                        ) {
 
-                    window.location.href =
-                        "index.html";
+                            auth.clearSession();
 
-                }
-            );
+                        }
 
-        });
+                        window.location.href =
+                            "index.html";
 
+                    }
+                );
+
+            }
+        );
 
     // ==========================================
     // REFRESH DASHBOARD
@@ -1114,7 +1318,6 @@ function limitDashboardVideoList() {
             await loadDashboardData();
 
         };
-
 
     // ==========================================
     // DASHBOARD TOAST
@@ -1129,7 +1332,6 @@ function limitDashboardVideoList() {
                 ".dashboard-toast"
             );
 
-
         if (!toast) {
 
             toast =
@@ -1137,10 +1339,8 @@ function limitDashboardVideoList() {
                     "div"
                 );
 
-
             toast.className =
                 "dashboard-toast";
-
 
             document.body.appendChild(
                 toast
@@ -1148,20 +1348,16 @@ function limitDashboardVideoList() {
 
         }
 
-
         toast.textContent =
             message;
-
 
         toast.classList.add(
             "show"
         );
 
-
         clearTimeout(
             toast.dashboardTimeout
         );
-
 
         toast.dashboardTimeout =
             setTimeout(
@@ -1177,7 +1373,6 @@ function limitDashboardVideoList() {
 
     }
 
-
     // ==========================================
     // DASHBOARD STYLES
     // ==========================================
@@ -1186,7 +1381,6 @@ function limitDashboardVideoList() {
         document.createElement(
             "style"
         );
-
 
     dashboardStyles.textContent = `
 
@@ -1199,7 +1393,6 @@ function limitDashboardVideoList() {
             text-align: center;
             padding: 30px;
         }
-
 
         .dashboard-empty-icon {
             width: 55px;
@@ -1215,20 +1408,17 @@ function limitDashboardVideoList() {
             margin-bottom: 15px;
         }
 
-
         .dashboard-empty-state h3 {
             margin: 0 0 7px;
             color: #ffffff;
             font-size: 16px;
         }
 
-
         .dashboard-empty-state p {
             margin: 0 0 18px;
             color: #64748b;
             font-size: 13px;
         }
-
 
         .dashboard-video-card {
             position: relative;
@@ -1243,7 +1433,6 @@ function limitDashboardVideoList() {
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-
         .dashboard-video-thumbnail {
             width: 130px;
             height: 76px;
@@ -1252,13 +1441,12 @@ function limitDashboardVideoList() {
             background: #070b12;
         }
 
-
         .dashboard-video-thumbnail video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
         }
-
 
         .dashboard-video-placeholder {
             width: 100%;
@@ -1277,21 +1465,27 @@ function limitDashboardVideoList() {
             font-weight: 800;
         }
 
+        .dashboard-video-info {
+            min-width: 0;
+        }
 
         .dashboard-video-info h3 {
             margin: 0 0 6px;
             color: #ffffff;
             font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-
 
         .dashboard-video-info span {
             color: #64748b;
             font-size: 11px;
         }
 
-
         .dashboard-video-menu {
+            position: relative;
+            z-index: 2;
             border: 0;
             background: transparent;
             color: #64748b;
@@ -1300,11 +1494,9 @@ function limitDashboardVideoList() {
             font-size: 12px;
         }
 
-
         .dashboard-video-menu:hover {
             color: #ffffff;
         }
-
 
         .video-actions-menu {
             position: fixed;
@@ -1317,7 +1509,6 @@ function limitDashboardVideoList() {
             backdrop-filter: blur(6px);
         }
 
-
         .video-actions-card {
             width: min(300px, 90%);
             padding: 10px;
@@ -1327,7 +1518,6 @@ function limitDashboardVideoList() {
             box-shadow:
                 0 25px 70px rgba(0,0,0,0.45);
         }
-
 
         .video-actions-card button {
             width: 100%;
@@ -1341,18 +1531,19 @@ function limitDashboardVideoList() {
             font-size: 13px;
         }
 
-
         .video-actions-card button:hover {
             background: rgba(255,255,255,0.05);
             color: #ffffff;
         }
-
 
         .video-actions-card
         button[data-action="delete"] {
             color: #f87171;
         }
 
+        .dashboard-see-more {
+            margin-bottom: 10px;
+        }
 
         .dashboard-toast {
             position: fixed;
@@ -1372,12 +1563,10 @@ function limitDashboardVideoList() {
             transition: 0.25s ease;
         }
 
-
         .dashboard-toast.show {
             opacity: 1;
             transform: translateY(0);
         }
-
 
         @media (max-width: 600px) {
 
@@ -1386,12 +1575,10 @@ function limitDashboardVideoList() {
                     90px 1fr auto;
             }
 
-
             .dashboard-video-thumbnail {
                 width: 90px;
                 height: 65px;
             }
-
 
             .dashboard-video-info h3 {
                 font-size: 12px;
@@ -1401,11 +1588,26 @@ function limitDashboardVideoList() {
 
     `;
 
+    /*
+     * Avoid injecting duplicate dashboard styles
+     * if the dashboard script is initialized again.
+     */
 
-    document.head.appendChild(
-        dashboardStyles
-    );
+    const existingDashboardStyles =
+        document.getElementById(
+            "eaglemotion-dashboard-styles"
+        );
 
+    if (!existingDashboardStyles) {
+
+        dashboardStyles.id =
+            "eaglemotion-dashboard-styles";
+
+        document.head.appendChild(
+            dashboardStyles
+        );
+
+    }
 
     // ==========================================
     // EXPOSE DASHBOARD DATA
@@ -1413,14 +1615,13 @@ function limitDashboardVideoList() {
 
     window.EagleMotionDashboard = {
 
-        getData: () =>
-            dashboardData,
+        getData:
+            () => dashboardData,
 
         refresh:
             window.refreshEagleMotionDashboard
 
     };
-
 
     // ==========================================
     // INITIALIZE
@@ -1431,13 +1632,3 @@ function limitDashboardVideoList() {
     );
 
 });
-
-
-
-
-
-
-
-
-
-
