@@ -36,7 +36,7 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults()) // Uses your existing CorsConfig bean
+            .cors(Customizer.withDefaults())
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             .sessionManagement(session ->
@@ -50,8 +50,10 @@ public class SecurityConfig {
                             "/api/health/**",
                             "/auth/**",
                             "/api/auth/**",
-                            "/auth/*",
-                            "/api/auth/*"
+                            "/videos",
+                            "/videos/**",
+                            "/api/videos",
+                            "/api/videos/**"
                     ).permitAll()
                     .anyRequest().authenticated()
             )
