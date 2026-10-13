@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -42,19 +43,23 @@ public class SecurityConfig {
             .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // Allow CORS OPTIONS preflight requests
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.OPTIONS, "/**")).permitAll()
+                    
+                    // Public endpoints (matching both with and without /api prefix)
                     .requestMatchers(
-                            "/health",
-                            "/health/**",
-                            "/api/health",
-                            "/api/health/**",
-                            "/auth/**",
-                            "/api/auth/**",
-                            "/videos",
-                            "/videos/**",
-                            "/api/videos",
-                            "/api/videos/**"
+                            AntPathRequestMatcher.antMatcher("/health"),
+                            AntPathRequestMatcher.antMatcher("/health/**"),
+                            AntPathRequestMatcher.antMatcher("/api/health"),
+                            AntPathRequestMatcher.antMatcher("/api/health/**"),
+                            AntPathRequestMatcher.antMatcher("/auth/**"),
+                            AntPathRequestMatcher.antMatcher("/api/auth/**"),
+                            AntPathRequestMatcher.antMatcher("/videos"),
+                            AntPathRequestMatcher.antMatcher("/videos/**"),
+                            AntPathRequestMatcher.antMatcher("/api/videos"),
+                            AntPathRequestMatcher.antMatcher("/api/videos/**")
                     ).permitAll()
+                    
                     .anyRequest().authenticated()
             )
             .addFilterBefore(
